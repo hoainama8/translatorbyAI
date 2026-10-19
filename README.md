@@ -1,5 +1,7 @@
 # haitrans
 
+![Ảnh chụp màn hình ứng dụng HaiTranslator](screenshot-2026-10-19_17-39-48.png)
+
 ## Định dạng tệp đầu ra
 
 Ứng dụng hỗ trợ các phần mở rộng chuẩn: `.txt`, `.docx`, `.pdf`, `.md`, `.tex` và `.odt`.

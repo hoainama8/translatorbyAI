@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -90,16 +91,20 @@ func main() {
 		LeftPadding:  20,
 		RightPadding: 20,
 	}
-	var bgStart, bgEnd color.NRGBA
-	switch GetSystemTheme() {
-	case Dark:
-		bgStart = color.NRGBA{R: 38, G: 31, B: 29, A: 255}
-		bgEnd = color.NRGBA{R: 66, G: 51, B: 46, A: 255}
-	default:
-		bgStart = color.NRGBA{R: 250, G: 245, B: 237, A: 255}
-		bgEnd = color.NRGBA{R: 232, G: 220, B: 205, A: 255}
+	bgColor := canvas.NewRadialGradient(color.Transparent, color.Transparent)
+	updateBackground := func(settings fyne.Settings) {
+		if settings.ThemeVariant() == theme.VariantDark {
+			bgColor.StartColor = color.NRGBA{R: 38, G: 31, B: 29, A: 255}
+			bgColor.EndColor = color.NRGBA{R: 66, G: 51, B: 46, A: 255}
+		} else {
+			bgColor.StartColor = color.NRGBA{R: 250, G: 245, B: 237, A: 255}
+			bgColor.EndColor = color.NRGBA{R: 232, G: 220, B: 205, A: 255}
+		}
+		bgColor.Refresh()
 	}
-	bgColor := canvas.NewRadialGradient(bgStart, bgEnd)
+	settings := myApp.Settings()
+	updateBackground(settings)
+	settings.AddListener(updateBackground)
 	myWindow.SetContent(container.NewStack(bgColor, container.New(lgCustom,
 		mainContent)))
 	myWindow.Resize(fyne.NewSize(1200, 650))
