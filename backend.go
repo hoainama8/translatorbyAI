@@ -1,10 +1,8 @@
 package main
 
 import (
-	"archive/zip"
 	"fmt"
 	"path/filepath"
-	"regexp"
 )
 
 const (
@@ -19,16 +17,16 @@ const (
 	maxDocTextSize         = 100 << 20
 )
 
-var supportedModels = map[string]struct{}{
-	"gemini-3.8-flash": {},
-	"gemma-4-31b-it":   {},
-}
+// var supportedModels = map[string]struct{}{
+// 	"gemini-3.8-flash": {},
+// 	"gemma-4-31b-it":   {},
+// }
 
-type translationResponse struct {
-	Text       string `json:"text"`
-	PDF        []byte `json:"pdf"`
-	OutputFile string `json:"outputFile,omitempty"`
-}
+//type translationResponse struct {
+// 	Text       string `json:"text"`
+// 	PDF        []byte `json:"pdf"`
+// 	OutputFile string `json:"outputFile,omitempty"`
+// }
 
 func safeStoredName(name string) string {
 	base := filepath.Base(name)
@@ -54,27 +52,27 @@ func BuildTextPrompt(request translationRequest) string {
 	)
 }
 
-var (
-	wordParagraphPattern = regexp.MustCompile(`(?s)<w:p(?:\s[^>]*)?>.*?</w:p>`)
-	wordTextPattern      = regexp.MustCompile(`(?s)<w:t(?:\s[^>]*)?>(.*?)</w:t>`)
-	wordParagraphPart    = regexp.MustCompile(`^word/(document|header[0-9]*|footer[0-9]*|footnotes|endnotes)\.xml$`)
-	odgParagraphPattern  = regexp.MustCompile(`(?s)<text:(?:p|h)\b[^>]*>.*?</text:(?:p|h)>`)
-	odgTextNodePattern   = regexp.MustCompile(`>([^<>]+)<`)
-	odgTagPattern        = regexp.MustCompile(`<[^>]+>`)
-	odgSpacePattern      = regexp.MustCompile(`<text:s(?:\s+text:c="([0-9]+)")?\s*/>`)
-)
+// var (
+// 	//wordParagraphPattern = regexp.MustCompile(`(?s)<w:p(?:\s[^>]*)?>.*?</w:p>`)
+// 	wordTextPattern      = regexp.MustCompile(`(?s)<w:t(?:\s[^>]*)?>(.*?)</w:t>`)
+// 	wordParagraphPart    = regexp.MustCompile(`^word/(document|header[0-9]*|footer[0-9]*|footnotes|endnotes)\.xml$`)
+// 	odgParagraphPattern  = regexp.MustCompile(`(?s)<text:(?:p|h)\b[^>]*>.*?</text:(?:p|h)>`)
+// 	odgTextNodePattern   = regexp.MustCompile(`>([^<>]+)<`)
+// 	odgTagPattern        = regexp.MustCompile(`<[^>]+>`)
+// 	odgSpacePattern      = regexp.MustCompile(`<text:s(?:\s+text:c="([0-9]+)")?\s*/>`)
+// )
 
-type documentParagraph struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
-}
+// type documentParagraph struct {
+// 	ID   int    `json:"id"`
+// 	Text string `json:"text"`
+// }
 
-type paragraphTranslation struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
-}
+// type paragraphTranslation struct {
+// 	ID   int    `json:"id"`
+// 	Text string `json:"text"`
+// }
 
-type documentZipPart struct {
-	header zip.FileHeader
-	data   []byte
-}
+// type documentZipPart struct {
+// 	header zip.FileHeader
+// 	data   []byte
+// }

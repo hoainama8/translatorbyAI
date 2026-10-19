@@ -26,17 +26,30 @@ func createOutputColumn(app fyne.App, outputEditor *widget.Entry) fyne.CanvasObj
 		}),
 		widget.NewToolbarSeparator(),
 		widget.NewToolbarAction(theme.ContentCutIcon(), func() {}),
+		widget.NewToolbarSeparator(),
 		widget.NewToolbarAction(theme.ContentCopyIcon(), func() {}),
-		widget.NewToolbarAction(theme.ContentPasteIcon(), func() {}),
 		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.ContentPasteIcon(), func() {}),
+		//widget.NewToolbarSpacer(),
 		widget.NewToolbarAction(theme.HelpIcon(), func() {
 			log.Println("Display help")
 		}))
 	//rightPanelBg := canvas.NewRectangle(color.NRGBA{R: 255, G: 248, B: 235, A: 255})
+	var nav *container.Navigation
+	root := container.NewVBox(
+		widget.NewLabel("The first screen"),
+		widget.NewButton("Show detail", func() {
+			detail := widget.NewLabel("The detail of the item")
+			nav.PushWithTitle(detail, "Detail")
+		}),
+	)
+
+	nav = container.NewNavigationWithTitle(root, "Home")
+
 	rightColumn := container.NewBorder(
 		toolbar,
 		container.NewHBox(copyBtn),
-		nil, nil,
+		nav, nil,
 		container.NewThemeOverride(
 			container.NewVScroll(outputEditor),
 			outputEditorTheme{Theme: theme.DefaultTheme()},

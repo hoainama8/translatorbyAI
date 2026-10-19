@@ -17,8 +17,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-const applicationID = "vn.hoainam.fynetranslator"
-
 type translationRequest struct {
 	APIKey     string
 	SourceLang string
@@ -46,11 +44,6 @@ func mimeTypeForFile(fileName string) string {
 	return mediaType
 }
 
-// ============================================================================
-// HÀM ĐÍNH KÈM FILE TÍCH HỢP QUẢN LÝ FILE
-// ============================================================================
-
-// ============================================================================
 // CHƯƠNG TRÌNH CHÍNH
 // ============================================================================
 
@@ -78,8 +71,9 @@ func main() {
 		return
 	}
 	myApp := app.NewWithID(applicationID)
+
 	myWindow := myApp.NewWindow("Phần Mềm Dịch Thuật AI Đa Ngôn Ngữ")
-	//var backend *localBackend
+	fmt.Println("icon", myApp.Metadata().Icon)
 
 	// CỘT 1: INPUT
 	leftColumn, refreshInputColumn := createInputColumn(models)

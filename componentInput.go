@@ -47,6 +47,8 @@ func createInputColumn(models []string) (*fyne.Container, func()) {
 
 func createInputTabs(models []string) *container.AppTabs {
 	text := canvas.NewText("Ngày", color.Black)
+	text.Resize(fyne.Size{Width: 1.5})
+	// text.Color = color.Gray{Y: 80}
 	tabs := container.NewAppTabs()
 	var tokenData tokenUsageData
 	tokenUsagePath, err := defaultTokenUsagePath()
@@ -84,7 +86,7 @@ func createInputTabs(models []string) *container.AppTabs {
 			colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", sessionCost), fyne.TextAlignCenter, fyne.TextStyle{}))
 		}
 
-		colDate.Add(widget.NewLabelWithStyle("Tổng", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		colDate.Add(widget.NewLabelWithStyle(text.ChangeText("Tổng").Text, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 		colHour.Add(widget.NewLabel(""))
 		colInputToken.Add(widget.NewLabel(""))
 		colOuputToken.Add(widget.NewLabel(""))
@@ -96,11 +98,9 @@ func createInputTabs(models []string) *container.AppTabs {
 		tabs.Append(container.NewTabItemWithIcon(
 			model,
 			theme.DocumentIcon(),
-			container.NewThemeOverride(
-				container.NewStack(db),
-				outputEditorTheme{Theme: theme.DefaultTheme()},
-			),
-		))
+			container.NewStack(db),
+		),
+		)
 	}
 	return tabs
 }
