@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,7 +21,7 @@ type attachedDocument struct {
 var document *attachedDocument
 var sourceName string
 
-func Control(outputEditor *widget.Entry, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string) fyne.CanvasObject {
+func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string) fyne.CanvasObject {
 	tokenUsagePath, pathErr := defaultTokenUsagePath()
 	if pathErr != nil {
 		tokenUsagePath = "token_usage.json"
@@ -47,24 +48,18 @@ func Control(outputEditor *widget.Entry, myWindow fyne.Window, Lang []string, mo
 
 	})
 
-	sourceLang := append([]string{"Tự động phát hiện"}, Lang...)
-	sourceLangSelect := widget.NewSelect(sourceLang, func(s string) {})
 	sourceLangSelect.SetSelected("Tự động phát hiện")
-
-	targetLangSelect := widget.NewSelect(Lang, func(s string) {})
 	targetLangSelect.SetSelected("Tiếng Việt")
 
-	modelSelect := widget.NewSelect(models, func(s string) {})
-	modelSelect.PlaceHolder = "Chọn mô hình AI"
-
-	apiKeyEntry := widget.NewPasswordEntry()
-	apiKeyEntry.SetPlaceHolder("Nhập API key")
-	progressBar := widget.NewProgressBarInfinite()
+	// modelSelect := widget.NewSelect(models, func(s string) {})
+	modelSelect.PlaceHolder = models[0]
+	extension.PlaceHolder = "Chọn định dạng tài liệu dịch"
 	progressBar.Hide()
 
 	var translateBtn *widget.Button
 
 	translateBtn = widget.NewButtonWithIcon("DỊCH NGAY VIA AI", theme.NavigateNextIcon(), func() {
+		fmt.Println(extension.Selected)
 		if document == nil {
 			dialog.ShowInformation("Cảnh báo", "Vui lòng nhập văn bản hoặc đính kèm tệp trước!", myWindow)
 			return
@@ -74,24 +69,27 @@ func Control(outputEditor *widget.Entry, myWindow fyne.Window, Lang []string, mo
 			return
 		}
 
+		if strings.TrimSpace(extension.Selected) == "" {
+			dialog.ShowInformation("Cảnh báo", "Vui lòng chọn định dạng file xuất ra", myWindow)
+			return
+		}
 		request := translationRequest{
 			APIKey:     apiKeyEntry.Text,
 			SourceLang: sourceLangSelect.Selected,
 			TargetLang: targetLangSelect.Selected,
-			//Text:       inputEditor.Text,
-			FileName: sourceName,
-			Model:    modelSelect.Selected,
+			FileName:   sourceName,
+			Extension:  extension.Selected,
+			Model:      modelSelect.Selected,
 		}
 		if document != nil {
 			request.FileName = document.name
 			request.FileType = mimeTypeForFile(document.name)
-			request.Document = append([]byte(nil), document.data...)
+			request.Document = base64.StdEncoding.EncodeToString(document.data)
 			// Backend uses the uploaded bytes as the source of truth and checks
 			// its format before forwarding anything to Gemini.
-			request.Text = string(document.data)
 
 		}
-		fmt.Println(request.Model, request.SourceLang, request.TargetLang, request.FileName, len(request.Document), len(request.Text))
+		fmt.Println(request)
 		progressBar.Show()
 		translateBtn.Disable()
 
@@ -125,6 +123,7 @@ func Control(outputEditor *widget.Entry, myWindow fyne.Window, Lang []string, mo
 		widget.NewFormItem("API key:", apiKeyEntry),
 		widget.NewFormItem("Ngôn ngữ nguồn:", sourceLangSelect),
 		widget.NewFormItem("Ngôn ngữ đích:", targetLangSelect),
+		widget.NewFormItem("Chọn định dạng file dịch", extension),
 		widget.NewFormItem("Mô hình AI:", modelSelect),
 		//widget.NewFormItem("Lựa chọn:", radio),
 		//widget.NewFormItem("Chọn:", combo),
@@ -135,12 +134,9 @@ func Control(outputEditor *widget.Entry, myWindow fyne.Window, Lang []string, mo
 		optionsForm,
 		container.NewCenter(translateBtn),
 		progressBar,
+		row2_2(inputDirectory, outDirectory, myApp, myWindow),
 	)
-	center2 := container.NewVBox(container.NewCenter(container.NewHBox(OpenDir(inputDirectory, myWindow), OpenDir(outDirectory, myWindow))),
-		widget.NewCard("Token phiên này", "Số token đã dùng từ khi mở ứng dụng", sessionTokensLabel),
-		widget.NewCard("Tổng token đã dùng", "Tích lũy qua các lần sử dụng", totalTokensLabel),
-	)
-	centerColumn := container.NewGridWithColumns(2, center1, center2)
+
 	//center_green := container.NewStack(canvas.NewHorizontalGradient(color.NRGBA{R: 92, G: 51, B: 23, A: 255} , color.White), centerColumn)
-	return centerColumn
+	return center1
 }

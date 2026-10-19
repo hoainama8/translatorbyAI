@@ -16,18 +16,16 @@ import (
 )
 
 // Mở thư mục được chỉ định
-func OpenDir(dir string, myWindow fyne.Window) *widget.Button {
-	return widget.NewButtonWithIcon("Mở thư mục input", theme.FolderOpenIcon(), func() {
+func OpenDir(dir string, myApp fyne.App, myWindow fyne.Window) func() {
+	return func() {
 		URL := &url.URL{
 			Scheme: "file",
 			Path:   filepath.ToSlash(dir),
 		}
-		if err := fyne.CurrentApp().OpenURL(URL); err != nil {
+		if err := myApp.OpenURL(URL); err != nil {
 			dialog.ShowError(fmt.Errorf("không thể mở thư mục input: %w", err), myWindow)
-
 		}
-	})
-
+	}
 }
 
 //var maxDocumentSize int = 100 * 1024 * 1024 // 100 MB
@@ -109,23 +107,10 @@ func MakeFileAttachmentCard(
 				return
 			}
 
-			data, err := io.ReadAll(io.LimitReader(reader, maxDocumentSize+1))
-			closeErr := reader.Close()
+			data, err := io.ReadAll(reader)
 			if err != nil {
 				fyne.Do(func() {
 					dialog.ShowError(fmt.Errorf("Không thể đọc tệp: %v", err), win)
-				})
-				return
-			}
-			if len(data) > maxDocumentSize {
-				fyne.Do(func() {
-					dialog.ShowError(fmt.Errorf("Tệp vượt quá giới hạn 100 MB của ứng dụng"), win)
-				})
-				return
-			}
-			if closeErr != nil {
-				fyne.Do(func() {
-					dialog.ShowError(fmt.Errorf("Không thể đóng tệp: %v", closeErr), win)
 				})
 				return
 			}

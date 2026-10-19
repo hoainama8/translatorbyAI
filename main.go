@@ -12,7 +12,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
@@ -21,11 +20,11 @@ type translationRequest struct {
 	APIKey     string
 	SourceLang string
 	TargetLang string
-	Text       string
 	FileName   string
 	FileType   string
 	Model      string
-	Document   []byte
+	Document   string // Dữ liệu file đính kèm đã mã hóa Base64
+	Extension  string // Định dạng file xuất ra
 }
 
 func mimeTypeForFile(fileName string) string {
@@ -48,8 +47,6 @@ func mimeTypeForFile(fileName string) string {
 // ============================================================================
 
 func main() {
-	Lang := []string{"Tiếng Việt", "Tiếng Anh", "Tiếng Nhật", "Tiếng Trung", "Tiếng Pháp", "Tiếng Hàn", "Tiếng Đức", "Tiếng Latin", "Tiếng Nga"}
-	models := []string{"gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemma-4-31b-it"}
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "không thể tìm thư mục home người dùng: %v\n", err)
@@ -73,38 +70,37 @@ func main() {
 	myApp := app.NewWithID(applicationID)
 
 	myWindow := myApp.NewWindow("Phần Mềm Dịch Thuật AI Đa Ngôn Ngữ")
-	fmt.Println("icon", myApp.Metadata().Icon)
 
 	// CỘT 1: INPUT
-	leftColumn, refreshInputColumn := createInputColumn(models)
+	//, refreshInputColumn := createInputColumn(models)
 
 	// CỘT 3: OUTPUT
 	outputEditor := widget.NewMultiLineEntry()
-	rightColumn := createOutputColumn(myApp, outputEditor)
-
+	row22, refeshInputColumn := createInputColumn(models)
+	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output)
+	row2 := container.NewGridWithColumns(2, row21, row22)
+	row1 := row1(outputEditor)
 	// CỘT 2: GIỮA
-	centerColumn := Control(outputEditor, myWindow, Lang, models, refreshInputColumn, directories.input, directories.output)
-	if desk, ok := myApp.(desktop.App); ok {
-		m := fyne.NewMenu("MyApp",
-			fyne.NewMenuItem("Show", func() {
-				myWindow.Show()
-			}))
-		desk.SetSystemTrayMenu(m)
-	}
-	mainContent := container.NewGridWithRows(3,
-		leftColumn,
-		centerColumn,
-		rightColumn,
+	mainContent := container.NewGridWithRows(2,
+		row1,
+		row2,
 	)
 	lgCustom := layout.CustomPaddedLayout{
 		TopPadding:   20,
 		LeftPadding:  20,
 		RightPadding: 20,
 	}
-	myWindow.SetContent(container.New(lgCustom, container.NewStack(
-		canvas.NewRadialGradient(
-			color.NRGBA{R: 92, G: 51, B: 23, A: 250},
-			color.NRGBA{R: 90, G: 70, B: 65, A: 220}),
+	var bgStart, bgEnd color.NRGBA
+	switch GetSystemTheme() {
+	case Dark:
+		bgStart = color.NRGBA{R: 38, G: 31, B: 29, A: 255}
+		bgEnd = color.NRGBA{R: 66, G: 51, B: 46, A: 255}
+	default:
+		bgStart = color.NRGBA{R: 250, G: 245, B: 237, A: 255}
+		bgEnd = color.NRGBA{R: 232, G: 220, B: 205, A: 255}
+	}
+	bgColor := canvas.NewRadialGradient(bgStart, bgEnd)
+	myWindow.SetContent(container.NewStack(bgColor, container.New(lgCustom,
 		mainContent)))
 	myWindow.Resize(fyne.NewSize(1200, 650))
 	// myWindow.SetCloseIntercept(func() {
