@@ -68,6 +68,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
+	if err := ensureTranslationHistoryFile(directories.history); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
 	myApp := app.NewWithID(applicationID)
 
 	myWindow := myApp.NewWindow("Phần Mềm Dịch Thuật AI Đa Ngôn Ngữ")
@@ -80,7 +84,7 @@ func main() {
 	// CỘT 3: OUTPUT
 	outputEditor := widget.NewMultiLineEntry()
 	row22, refeshInputColumn := createInputColumn(models)
-	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus)
+	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
 	row2 := container.NewGridWithColumns(2, row21, row22)
 	row1 := row1(outputEditor)
 	// CỘT 2: GIỮA

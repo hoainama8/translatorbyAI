@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -21,7 +22,7 @@ type attachedDocument struct {
 var document *attachedDocument
 var sourceName string
 
-func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity) fyne.CanvasObject {
+func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity, historyPath string) fyne.CanvasObject {
 	tokenUsagePath, pathErr := defaultTokenUsagePath()
 	if pathErr != nil {
 		tokenUsagePath = "token_usage.json"
@@ -40,6 +41,11 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 	}
 
 	attachmentSection := MakeFileAttachmentCard(myWindow, func(fileName string, content []byte) {
+		if len(content) == 0 {
+			sourceName = ""
+			document = nil
+			return
+		}
 		sourceName = fileName
 		document = &attachedDocument{
 			name: fileName,
@@ -73,6 +79,48 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 			dialog.ShowInformation("Cảnh báo", "Vui lòng chọn định dạng file xuất ra", myWindow)
 			return
 		}
+		detectedLanguage, matchesTarget, err := documentLanguageMatchesTarget(
+			document.data,
+			document.name,
+			targetLangSelect.Selected,
+		)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		if detectedLanguage == "" {
+			detectedLanguage = "Không xác định"
+			if sourceLangSelect.Selected != "" && sourceLangSelect.Selected != "Tự động phát hiện" {
+				detectedLanguage = sourceLangSelect.Selected
+			}
+		}
+		historyRequest := translationHistoryEntry{
+			DocumentName:     document.name,
+			DocumentLanguage: detectedLanguage,
+			TargetLanguage:   targetLangSelect.Selected,
+		}
+		previousResult, foundPreviousResult, err := latestTranslationResult(historyPath, historyRequest)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		if foundPreviousResult && previousResult == "thành công" {
+			dialog.ShowInformation(
+				"Cảnh báo",
+				fmt.Sprintf("Tài liệu %q đã được dịch thành công từ %s sang %s.", document.name, detectedLanguage, targetLangSelect.Selected),
+				myWindow,
+			)
+			return
+		}
+		if matchesTarget && !(foundPreviousResult && previousResult == "thất bại") {
+			dialog.ShowInformation(
+				"Cảnh báo",
+				fmt.Sprintf("Nội dung tài liệu đã là %s. Vui lòng chọn ngôn ngữ đích khác.", targetLangSelect.Selected),
+				myWindow,
+			)
+			return
+		}
+
 		request := translationRequest{
 			APIKey:     apiKeyEntry.Text,
 			SourceLang: sourceLangSelect.Selected,
@@ -100,9 +148,30 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 				defer translationStatus.setInProgress(false)
 				progressBar.Hide()
 				translateBtn.Enable()
+				outputText := (*string)(nil)
+				if response != nil {
+					outputText = response.GetOutputText()
+				}
+				result := "thành công"
+				if err != nil || outputText == nil {
+					result = "thất bại"
+				}
+				if historyErr := appendTranslationHistory(historyPath, translationHistoryEntry{
+					Date:             time.Now().UTC(),
+					DocumentName:     request.FileName,
+					DocumentLanguage: detectedLanguage,
+					TargetLanguage:   request.TargetLang,
+					Result:           result,
+				}); historyErr != nil {
+					dialog.ShowError(historyErr, myWindow)
+				}
 				if err != nil {
 					fmt.Println(err)
 					dialog.ShowError(err, myWindow)
+					return
+				}
+				if outputText == nil {
+					dialog.ShowError(fmt.Errorf("bản dịch không có nội dung văn bản"), myWindow)
 					return
 				}
 				if response.GetUsage() != nil {
@@ -114,8 +183,8 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 						refreshInputColumn()
 					}
 				}
-				outputEditor.SetText(*response.GetOutputText())
-				showSavedTranslation(myWindow, request, *response.GetOutputText())
+				outputEditor.SetText(*outputText)
+				showSavedTranslation(myWindow, request, *outputText)
 			})
 		}()
 	})

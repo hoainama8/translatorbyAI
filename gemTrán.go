@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"google.golang.org/genai"
@@ -24,7 +23,7 @@ func TestTrans(req translationRequest) (*InteractionsJSON, error) {
 		Backend: genai.BackendGeminiAPI,
 	})
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("không thể khởi tạo Gemini client: %w", err)
 	}
 	fileover50mb := validateDocumentSize(req.Document, maxGeminiBatchSize)
 

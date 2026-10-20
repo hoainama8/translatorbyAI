@@ -11,6 +11,7 @@ const (
 	inputDirectoryName       = "input"
 	outputDirectoryName      = "output"
 	tokenUsageFileName       = "use_token.json"
+	translationHistoryName   = "history.json"
 )
 
 type applicationDirectories struct {
@@ -18,6 +19,7 @@ type applicationDirectories struct {
 	input      string
 	output     string
 	tokenUsage string
+	history    string
 }
 
 func applicationDirectoriesFor(homeDir string) (applicationDirectories, error) {
@@ -31,6 +33,7 @@ func applicationDirectoriesFor(homeDir string) (applicationDirectories, error) {
 		input:      filepath.Join(root, inputDirectoryName),
 		output:     filepath.Join(root, outputDirectoryName),
 		tokenUsage: filepath.Join(root, tokenUsageFileName),
+		history:    filepath.Join(root, translationHistoryName),
 	}, nil
 }
 

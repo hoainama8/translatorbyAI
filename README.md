@@ -1,7 +1,11 @@
 # Hướng dẫn sử dụng HaiTranslator
 
-HaiTranslator là ứng dụng dịch tài liệu bằng Gemini. Ứng dụng gửi nội dung tệp
-đã chọn đến Gemini, hiển thị bản dịch và lưu bản dịch thành tệp mới.
+HaiTranslator là ứng dụng dịch tài liệu bằng Gemini. Trước khi dịch, ứng dụng
+kiểm tra ngôn ngữ nội dung tệp ngay trên máy; nếu nội dung đã cùng ngôn ngữ đích,
+ứng dụng sẽ cảnh báo và dừng. Nếu tiếp tục dịch, nội dung tệp được gửi đến Gemini,
+hiển thị bản dịch và lưu bản dịch thành tệp mới.
+Mỗi lượt dịch được ghi vào `~/haitranslator/history.json` với ngày, tên tài liệu,
+ngôn ngữ tài liệu, ngôn ngữ đích và kết quả thành công/thất bại.
 
 ![Ảnh chụp màn hình ứng dụng HaiTranslator](screenshot-2026-10-19_17-39-48.png)
 ## Các phần trên giao diện

@@ -4,6 +4,9 @@ go 1.27.1
 
 require (
 	fyne.io/fyne/v2 v2.8.1
+	github.com/ledongthuc/pdf v0.0.0-20260907135840-6c8c28e0e8a0
+	github.com/pemistahl/lingua-go v1.4.0
+	golang.org/x/net v0.38.0
 	golang.org/x/sys v0.49.0
 	google.golang.org/genai v1.72.0
 )
@@ -42,14 +45,15 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/srwiley/oksvg v0.0.0-20221011165216-be6e8873101c // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/yuin/goldmark v1.8.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/exp v0.0.0-20221106115401-f9659909a136 // indirect
 	golang.org/x/image v0.24.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/grpc v1.66.2 // indirect
