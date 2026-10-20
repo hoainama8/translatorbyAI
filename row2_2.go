@@ -50,43 +50,44 @@ func createInputTabs(models []string) *container.AppTabs {
 	}
 
 	for _, model := range models {
-		colDate := container.NewVBox(widget.NewLabelWithStyle(fmt.Sprintf("%s", text.Text), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-		colHour := container.NewVBox(widget.NewLabelWithStyle("Giờ", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-		colInputToken := container.NewVBox(widget.NewLabelWithStyle("Input Token", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-		colOuputToken := container.NewVBox(widget.NewLabelWithStyle("Output Token", fyne.TextAlignCenter, fyne.TextStyle{}))
-		colThoughtToken := container.NewVBox(widget.NewLabelWithStyle("Thought Token", fyne.TextAlignCenter, fyne.TextStyle{}))
-		colCachedToken := container.NewVBox(widget.NewLabelWithStyle("Cached Token", fyne.TextAlignCenter, fyne.TextStyle{}))
-		colCost := container.NewVBox(widget.NewLabelWithStyle("Chi Phi", fyne.TextAlignCenter, fyne.TextStyle{}))
+		// colDate := container.NewVBox(widget.NewLabelWithStyle(fmt.Sprintf("%s", text.Text), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		// colHour := container.NewVBox(widget.NewLabelWithStyle("Giờ", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		// colInputToken := container.NewVBox(widget.NewLabelWithStyle("Input Token", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		// colOuputToken := container.NewVBox(widget.NewLabelWithStyle("Output Token", fyne.TextAlignCenter, fyne.TextStyle{}))
+		// colThoughtToken := container.NewVBox(widget.NewLabelWithStyle("Thought Token", fyne.TextAlignCenter, fyne.TextStyle{}))
+		// colCachedToken := container.NewVBox(widget.NewLabelWithStyle("Cached Token", fyne.TextAlignCenter, fyne.TextStyle{}))
+		// colCost := container.NewVBox(widget.NewLabelWithStyle("Chi Phi", fyne.TextAlignCenter, fyne.TextStyle{}))
 
-		price := modelPrices[model]
-		var totalCost float64
-		for _, session := range tokenData[model] {
-			colDate.Add(widget.NewLabelWithStyle(session.StartedAt.Format("2006-01-02"), fyne.TextAlignCenter, fyne.TextStyle{}))
-			colHour.Add(widget.NewLabelWithStyle(session.StartedAt.Format("15:04:05"), fyne.TextAlignCenter, fyne.TextStyle{}))
-			colInputToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.InputTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
-			colOuputToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.OutputTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
-			colThoughtToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.ThoughtTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
-			colCachedToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.TotalTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
-			sessionCost := (float64(session.InputTokens) * price.Input) + (float64(session.OutputTokens+session.ThoughtTokens) * price.Output)
-			totalCost += sessionCost
-			colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", sessionCost), fyne.TextAlignCenter, fyne.TextStyle{}))
-		}
+		// price := modelPrices[model]
+		// var totalCost float64
+		// for _, session := range tokenData[model] {
+		// 	colDate.Add(widget.NewLabelWithStyle(session.StartedAt.Format("2006-01-02"), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	colHour.Add(widget.NewLabelWithStyle(session.StartedAt.Format("15:04:05"), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	colInputToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.InputTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	colOuputToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.OutputTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	colThoughtToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.ThoughtTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	colCachedToken.Add(widget.NewLabelWithStyle(fmt.Sprintf("%d", session.TotalTokens), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// 	sessionCost := (float64(session.InputTokens) * price.Input) + (float64(session.OutputTokens+session.ThoughtTokens) * price.Output)
+		// 	totalCost += sessionCost
+		// 	colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", sessionCost), fyne.TextAlignCenter, fyne.TextStyle{}))
+		// }
 
-		colDate.Add(widget.NewLabelWithStyle(text.ChangeText("Tổng").Text, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
-		colHour.Add(widget.NewLabel(""))
-		colInputToken.Add(widget.NewLabel(""))
-		colOuputToken.Add(widget.NewLabel(""))
-		colThoughtToken.Add(widget.NewLabel(""))
-		colCachedToken.Add(widget.NewLabel(""))
-		colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", totalCost), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		// colDate.Add(widget.NewLabelWithStyle(text.ChangeText("Tổng").Text, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
+		// colHour.Add(widget.NewLabel(""))
+		// colInputToken.Add(widget.NewLabel(""))
+		// colOuputToken.Add(widget.NewLabel(""))
+		// colThoughtToken.Add(widget.NewLabel(""))
+		// colCachedToken.Add(widget.NewLabel(""))
+		// colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", totalCost), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 
-		db := container.NewScroll(
-			container.NewGridWithColumns(7, colDate, colHour, colInputToken,
-				colOuputToken, colThoughtToken, colCachedToken, colCost))
+		// db := container.NewScroll(
+		// 	container.NewGridWithColumns(7, colDate, colHour, colInputToken,
+		// 		colOuputToken, colThoughtToken, colCachedToken, colCost))
+		tableCost := CostTable(tokenData, model)
 		tabs.Append(container.NewTabItemWithIcon(
 			model,
 			theme.DocumentIcon(),
-			container.NewStack(db),
+			container.NewStack(tableCost),
 		),
 		)
 	}
@@ -119,4 +120,81 @@ func createInputTabs(models []string) *container.AppTabs {
 	))
 
 	return tabs
+}
+
+func CostTable(entries tokenUsageData, model string) *widget.Table {
+	headers := []string{"Ngày", "Giờ", "Input", "Output", "Cached", "Chi phí"}
+	sessions := entries[model]
+	totalRow := len(sessions) + 1
+	if len(sessions) == 0 {
+		totalRow++
+	}
+	rows := totalRow + 1
+	price := modelPrices[model]
+	sessionCost := func(session tokenUsageSession) float64 {
+		inputTokens := session.InputTokens - session.CachedTokens
+		if inputTokens < 0 {
+			inputTokens = 0
+		}
+		return float64(inputTokens)*price.Input +
+			float64(session.CachedTokens)*price.Cached +
+			float64(session.OutputTokens+session.ThoughtTokens)*price.Output
+	}
+	var totalCost float64
+	for _, session := range sessions {
+		totalCost += sessionCost(session)
+	}
+	table := widget.NewTable(
+		func() (int, int) { return rows, len(headers) },
+		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func(cell widget.TableCellID, object fyne.CanvasObject) {
+			label := object.(*widget.Label)
+			if cell.Row == 0 {
+				label.TextStyle = fyne.TextStyle{Bold: true}
+				label.SetText(headers[cell.Col])
+				return
+			}
+			if cell.Row == totalRow {
+				label.TextStyle = fyne.TextStyle{Bold: true}
+				switch cell.Col {
+				case 0:
+					label.SetText("Tổng")
+				case 5:
+					label.SetText(fmt.Sprintf("$%.6f", totalCost))
+				default:
+					label.SetText("")
+				}
+				return
+			}
+			label.TextStyle = fyne.TextStyle{}
+			if len(sessions) == 0 {
+				if cell.Col == 0 {
+					label.SetText("Chưa có dữ liệu")
+				} else {
+					label.SetText("")
+				}
+				return
+			}
+
+			session := sessions[cell.Row-1]
+			switch cell.Col {
+			case 0:
+				label.SetText(session.StartedAt.Format("2006-01-02"))
+			case 1:
+				label.SetText(session.StartedAt.Format("15:04:05"))
+			case 2:
+				label.SetText(fmt.Sprintf("%d", session.InputTokens))
+			case 3:
+				label.SetText(fmt.Sprintf("%d", session.OutputTokens+session.ThoughtTokens))
+			case 4:
+				label.SetText(fmt.Sprintf("%d", session.CachedTokens))
+			case 5:
+				label.SetText(fmt.Sprintf("$%.6f", sessionCost(session)))
+			}
+		},
+	)
+	for col, width := range []float32{120, 100, 110, 110, 110, 120} {
+		table.SetColumnWidth(col, width)
+	}
+	return table
 }

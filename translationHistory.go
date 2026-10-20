@@ -61,3 +61,16 @@ func appendTranslationHistory(filePath string, entry translationHistoryEntry) er
 	}
 	return nil
 }
+
+func readTranslationHistory(filePath string) ([]translationHistoryEntry, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("không thể đọc lịch sử dịch: %w", err)
+	}
+
+	var entries []translationHistoryEntry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		return nil, fmt.Errorf("không thể giải mã lịch sử dịch: %w", err)
+	}
+	return entries, nil
+}

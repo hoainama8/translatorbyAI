@@ -205,7 +205,7 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		optionsForm,
 		container.NewCenter(translateBtn),
 		progressBar,
-		row2_2(inputDirectory, outDirectory, myApp, myWindow),
+		row2_2(inputDirectory, outDirectory, historyPath, myApp, myWindow),
 	)
 
 	//center_green := container.NewStack(canvas.NewHorizontalGradient(color.NRGBA{R: 92, G: 51, B: 23, A: 255} , color.White), centerColumn)

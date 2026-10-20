@@ -5,7 +5,62 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
+
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/widget"
 )
+
+func TestCostTableShowsModelUsageAndCost(t *testing.T) {
+	app := test.NewApp()
+	t.Cleanup(app.Quit)
+	entries := tokenUsageData{
+		"gemini-3.8-flash": {{
+			StartedAt:     time.Date(2026, time.October, 21, 3, 30, 0, 0, time.UTC),
+			InputTokens:   1000,
+			CachedTokens:  200,
+			OutputTokens:  100,
+			ThoughtTokens: 50,
+		}},
+	}
+	table := CostTable(entries, "gemini-3.8-flash")
+	if rows, columns := table.Length(); rows != 3 || columns != 6 {
+		t.Fatalf("table dimensions = %dx%d, want 3x6", rows, columns)
+	}
+
+	want := []string{"2026-10-21", "03:30:00", "1000", "150", "200", "$0.001178"}
+	for col, expected := range want {
+		cell := table.CreateCell()
+		table.UpdateCell(widget.TableCellID{Row: 1, Col: col}, cell)
+		if got := cell.(*widget.Label).Text; got != expected {
+			t.Errorf("cell (1,%d) = %q, want %q", col, got, expected)
+		}
+	}
+	totalCell := table.CreateCell()
+	table.UpdateCell(widget.TableCellID{Row: 2, Col: 5}, totalCell)
+	if got := totalCell.(*widget.Label).Text; got != "$0.001178" {
+		t.Errorf("total cost = %q, want %q", got, "$0.001178")
+	}
+}
+
+func TestCostTableShowsEmptyStateForModel(t *testing.T) {
+	app := test.NewApp()
+	t.Cleanup(app.Quit)
+	table := CostTable(tokenUsageData{"another-model": {{InputTokens: 1}}}, "gemini-3.8-flash")
+	if rows, columns := table.Length(); rows != 3 || columns != 6 {
+		t.Fatalf("table dimensions = %dx%d, want 3x6", rows, columns)
+	}
+	cell := table.CreateCell()
+	table.UpdateCell(widget.TableCellID{Row: 1, Col: 0}, cell)
+	if got := cell.(*widget.Label).Text; got != "Chưa có dữ liệu" {
+		t.Errorf("empty-state text = %q, want %q", got, "Chưa có dữ liệu")
+	}
+	totalCell := table.CreateCell()
+	table.UpdateCell(widget.TableCellID{Row: 2, Col: 5}, totalCell)
+	if got := totalCell.(*widget.Label).Text; got != "$0.000000" {
+		t.Errorf("empty total cost = %q, want %q", got, "$0.000000")
+	}
+}
 
 func TestTokenUsageTrackerPersistsPerModelAndSession(t *testing.T) {
 	filePath := filepath.Join(t.TempDir(), "use_token.json")
