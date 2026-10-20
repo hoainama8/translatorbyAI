@@ -71,6 +71,8 @@ func main() {
 	myApp := app.NewWithID(applicationID)
 
 	myWindow := myApp.NewWindow("Phần Mềm Dịch Thuật AI Đa Ngôn Ngữ")
+	translationStatus := &translationActivity{}
+	installTranslationCloseGuard(myWindow, translationStatus)
 
 	// CỘT 1: INPUT
 	//, refreshInputColumn := createInputColumn(models)
@@ -78,7 +80,7 @@ func main() {
 	// CỘT 3: OUTPUT
 	outputEditor := widget.NewMultiLineEntry()
 	row22, refeshInputColumn := createInputColumn(models)
-	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output)
+	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus)
 	row2 := container.NewGridWithColumns(2, row21, row22)
 	row1 := row1(outputEditor)
 	// CỘT 2: GIỮA
@@ -108,8 +110,5 @@ func main() {
 	myWindow.SetContent(container.NewStack(bgColor, container.New(lgCustom,
 		mainContent)))
 	myWindow.Resize(fyne.NewSize(1200, 650))
-	// myWindow.SetCloseIntercept(func() {
-	// 	myWindow.Hide()
-	// })
 	myWindow.ShowAndRun()
 }

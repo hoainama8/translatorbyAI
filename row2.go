@@ -21,7 +21,7 @@ type attachedDocument struct {
 var document *attachedDocument
 var sourceName string
 
-func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string) fyne.CanvasObject {
+func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity) fyne.CanvasObject {
 	tokenUsagePath, pathErr := defaultTokenUsagePath()
 	if pathErr != nil {
 		tokenUsagePath = "token_usage.json"
@@ -92,10 +92,12 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		fmt.Println(request)
 		progressBar.Show()
 		translateBtn.Disable()
+		translationStatus.setInProgress(true)
 
 		go func() {
 			response, err := TestTrans(request)
 			fyne.Do(func() {
+				defer translationStatus.setInProgress(false)
 				progressBar.Hide()
 				translateBtn.Enable()
 				if err != nil {

@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+func TestTestTransRequiresAPIKey(t *testing.T) {
+	_, err := TestTrans(translationRequest{APIKey: " \t\n"})
+	if err == nil || err.Error() != "Gemini API key is required" {
+		t.Fatalf("TestTrans() error = %v, want Gemini API key is required", err)
+	}
+}
+
 func TestValidateDocumentSize(t *testing.T) {
 	tests := []struct {
 		name          string

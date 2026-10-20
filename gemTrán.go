@@ -14,8 +14,15 @@ import (
 )
 
 func TestTrans(req translationRequest) (*InteractionsJSON, error) {
+	apikey := strings.TrimSpace(req.APIKey)
+	if apikey == "" {
+		return nil, errors.New("Gemini API key is required")
+	}
 	ctx := context.Background()
-	client, err := genai.NewClient(ctx, nil)
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  apikey,
+		Backend: genai.BackendGeminiAPI,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -13,20 +13,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-type Price struct {
-	Input  float64
-	Output float64
-	Cached float64
-}
-
-var modelPrices = map[string]Price{
-	"gemini-3.8-flash":      {Input: 0.75 / 100000000, Output: 3.75 / 100000000, Cached: 0.075 / 100000000},
-	"gemini-3.6-flash":      {Input: 0.75 / 100000000, Output: 3.75 / 100000000, Cached: 0.075 / 100000000},
-	"gemini-3.5-flash-Lite": {Input: 0.3 / 100000000, Output: 2.5 / 100000000, Cached: 0.03 / 100000000},
-	// "gemini-3.6-flash": {Input: ..., Output: ...},
-	"gemma-4-31b-it": {Input: 0, Output: 0, Cached: 0},
-}
-
 // CỘT 1: INPUT
 func createInputColumn(models []string) (*fyne.Container, func()) {
 
@@ -94,7 +80,9 @@ func createInputTabs(models []string) *container.AppTabs {
 		colCachedToken.Add(widget.NewLabel(""))
 		colCost.Add(widget.NewLabelWithStyle(fmt.Sprintf("$%.6f", totalCost), fyne.TextAlignCenter, fyne.TextStyle{Bold: true}))
 
-		db := container.NewScroll(container.NewGridWithColumns(7, colDate, colHour, colInputToken, colOuputToken, colThoughtToken, colCachedToken, colCost))
+		db := container.NewScroll(
+			container.NewGridWithColumns(7, colDate, colHour, colInputToken,
+				colOuputToken, colThoughtToken, colCachedToken, colCost))
 		tabs.Append(container.NewTabItemWithIcon(
 			model,
 			theme.DocumentIcon(),
@@ -102,5 +90,33 @@ func createInputTabs(models []string) *container.AppTabs {
 		),
 		)
 	}
+
+	priceModelColumn := container.NewVBox(widget.NewLabelWithStyle("Mô hình", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	priceInputColumn := container.NewVBox(widget.NewLabelWithStyle("Input (USD)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	priceOutputColumn := container.NewVBox(widget.NewLabelWithStyle("Output (USD)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	priceCachedColumn := container.NewVBox(widget.NewLabelWithStyle("Cached (USD)", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	for _, model := range models {
+		price := modelPrices[model]
+		priceModelColumn.Add(widget.NewLabel(model))
+		priceInputColumn.Add(widget.NewLabel(fmt.Sprintf("$%.6f", price.Input*limitToken)))
+		priceOutputColumn.Add(widget.NewLabel(fmt.Sprintf("$%.6f", price.Output*limitToken)))
+		priceCachedColumn.Add(widget.NewLabel(fmt.Sprintf("$%.6f", price.Cached*limitToken)))
+	}
+
+	priceTable := container.NewThemeOverride(container.NewGridWithColumns(4,
+		priceModelColumn,
+		priceInputColumn,
+		priceOutputColumn,
+		priceCachedColumn,
+	), outputEditorTheme{Theme: theme.DefaultTheme()})
+	tabs.Append(container.NewTabItemWithIcon(
+		"Đơn giá",
+		theme.DocumentIcon(),
+		container.NewVBox(
+			widget.NewLabelWithStyle("Đơn giá trên 1 triệu token", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+			priceTable,
+		),
+	))
+
 	return tabs
 }
