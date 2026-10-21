@@ -83,10 +83,15 @@ func main() {
 
 	// CỘT 3: OUTPUT
 	outputEditor := widget.NewMultiLineEntry()
+
+	outputEditor.SetText(readme)
 	row22, refeshInputColumn := createInputColumn(models)
 	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
 	row2 := container.NewGridWithColumns(2, row21, row22)
-	row1 := row1(outputEditor)
+	row1 := container.NewThemeOverride(
+		row1(outputEditor),
+		outputEditorTheme{Theme: theme.DefaultTheme()},
+	)
 	// CỘT 2: GIỮA
 	mainContent := container.NewGridWithRows(2,
 		row1,

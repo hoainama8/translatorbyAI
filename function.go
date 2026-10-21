@@ -144,7 +144,7 @@ func MakeFileAttachmentCard(
 
 	// 2. Nút HỦY FILE
 	clearBtn := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-		statusLabel.SetText("Chưa có tệp nào được đính kèm")
+		statusLabel.SetText(readme)
 		statusLabel.TextStyle = fyne.TextStyle{Italic: true}
 		if onContentLoaded != nil {
 			onContentLoaded("", nil)

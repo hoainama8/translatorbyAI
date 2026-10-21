@@ -1,20 +1,23 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 func row2_2(inputDirectory string, outDirectory string, historyPath string, myApp fyne.App, myWindow fyne.Window) *fyne.Container {
 	var popUp *widget.PopUp
-	content := container.NewVBox()
+	content := container.NewStack()
 	popUp = widget.NewModalPopUp(content, myWindow.Canvas())
-	popUp.Resize(fyne.NewSize(1000, 700))
+	popUp.Resize(fyne.NewSize(1500, 700))
 
 	open := widget.NewButton("Lịch sử dịch", func() {
 		entries, err := readTranslationHistory(historyPath)
@@ -25,19 +28,68 @@ func row2_2(inputDirectory string, outDirectory string, historyPath string, myAp
 		closeButton := widget.NewButton("Đóng", func() {
 			popUp.Hide()
 		})
-		content.Objects = []fyne.CanvasObject{container.NewGridWithRows(2,
-			translationHistoryTable(entries),
-			container.NewCenter(container.NewGridWrap(fyne.NewSize(80, 20), closeButton)),
+		content.Objects = []fyne.CanvasObject{container.NewBorder(
+			widget.NewLabelWithStyle("Thống kê lịch sử dịch tài liệu", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+			container.NewHBox(layout.NewSpacer(), closeButton),
+			nil,
+			nil,
+			container.NewThemeOverride(translationHistoryTable(entries), outputEditorTheme{Theme: theme.DefaultTheme()}),
 		)}
 		content.Refresh()
 		popUp.Show()
 	})
 
+	// Xem lịch sử sử dụng token
+	costBtn := widget.NewButton("Chi phí đã sử dụng", func() {
+		popUp.Resize(fyne.NewSize(1300, 700))
+		tokenUsagePath, err := defaultTokenUsagePath()
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		tokenFile, err := os.ReadFile(tokenUsagePath)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		tokenData, err := decodeTokenUsageData(tokenFile)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+
+		tabs := container.NewAppTabs()
+		for _, model := range models {
+			table := CostTable(tokenData, model)
+			for col, width := range []float32{210, 170, 220, 220, 220, 260} {
+				table.SetColumnWidth(col, width)
+			}
+			tabs.Append(container.NewTabItemWithIcon(
+				model,
+				theme.DocumentIcon(),
+				container.NewThemeOverride(table, outputEditorTheme{Theme: theme.DefaultTheme()}),
+			))
+		}
+
+		closeButton := widget.NewButton("Đóng", func() {
+			popUp.Hide()
+		})
+		content.Objects = []fyne.CanvasObject{container.NewBorder(
+			widget.NewLabelWithStyle("Bảng thống kê chi phí", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+			container.NewHBox(layout.NewSpacer(), closeButton),
+			nil,
+			nil,
+			tabs,
+		)}
+		content.Refresh()
+		popUp.Show()
+	})
 	res := container.NewVBox(container.NewCenter(
 		container.NewHBox(
 			widget.NewButtonWithIcon("Mở thư mục tài liệu gốc", theme.FolderOpenIcon(), OpenDir(inputDirectory, myApp, myWindow)),
 			widget.NewButtonWithIcon("Mở thư mục tài liệu dịch", theme.FolderOpenIcon(), OpenDir(outDirectory, myApp, myWindow)),
 			open,
+			costBtn,
 		)))
 	return res
 }
@@ -50,21 +102,35 @@ func translationHistoryTable(entries []translationHistoryEntry) *widget.Table {
 	}
 	table := widget.NewTable(
 		func() (int, int) { return rows, len(headers) },
-		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func() fyne.CanvasObject {
+			return container.NewStack(
+				canvas.NewRectangle(theme.Color(theme.ColorNameBackground)),
+				widget.NewLabel(""),
+			)
+		},
 		func(cell widget.TableCellID, object fyne.CanvasObject) {
-			label := object.(*widget.Label)
+			cellContainer := object.(*fyne.Container)
+			background := cellContainer.Objects[0].(*canvas.Rectangle)
+			label := cellContainer.Objects[1].(*widget.Label)
+			background.FillColor = theme.Color(theme.ColorNameBackground)
+			label.Truncation = fyne.TextTruncateEllipsis
 			if cell.Row == 0 {
 				label.TextStyle = fyne.TextStyle{Bold: true}
 				label.SetText(headers[cell.Col])
+				background.Refresh()
 				return
 			}
 			label.TextStyle = fyne.TextStyle{}
+			if cell.Row%2 == 1 {
+				background.FillColor = theme.Color(theme.ColorNameInputBackground)
+			}
 			if len(entries) == 0 {
-				if cell.Col == 1 {
+				if cell.Col == 0 {
 					label.SetText("Chưa có lịch sử dịch")
 				} else {
 					label.SetText("")
 				}
+				background.Refresh()
 				return
 			}
 
@@ -87,11 +153,11 @@ func translationHistoryTable(entries []translationHistoryEntry) *widget.Table {
 			default:
 				label.SetText("")
 			}
+			background.Refresh()
 		},
 	)
-	for col, width := range []float32{150, 220, 150, 150, 110} {
+	for col, width := range []float32{190, 420, 220, 220, 180} {
 		table.SetColumnWidth(col, width)
 	}
-	//table.UpdateHeader()
 	return table
 }

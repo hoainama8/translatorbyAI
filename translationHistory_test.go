@@ -6,7 +6,53 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
+
+func TestTranslationHistoryTableClipsTextAndAlternatesRows(t *testing.T) {
+	app := test.NewApp()
+	t.Cleanup(app.Quit)
+
+	table := translationHistoryTable([]translationHistoryEntry{
+		{DocumentName: "document-with-a-very-long-name.pdf"},
+		{DocumentName: "second-document.pdf"},
+	})
+	newCell := func(row int) (*canvas.Rectangle, *widget.Label) {
+		t.Helper()
+		cell := table.CreateCell().(*fyne.Container)
+		table.UpdateCell(widget.TableCellID{Row: row, Col: 1}, cell)
+		return cell.Objects[0].(*canvas.Rectangle), cell.Objects[1].(*widget.Label)
+	}
+
+	headerBackground, header := newCell(0)
+	if header.Truncation != fyne.TextTruncateEllipsis {
+		t.Errorf("header truncation = %v, want ellipsis", header.Truncation)
+	}
+	if got, want := headerBackground.FillColor, theme.Color(theme.ColorNameBackground); got != want {
+		t.Errorf("header background = %v, want default background %v", got, want)
+	}
+
+	firstBackground, first := newCell(1)
+	if first.Truncation != fyne.TextTruncateEllipsis {
+		t.Errorf("data truncation = %v, want ellipsis", first.Truncation)
+	}
+	if first.Text != "document-with-a-very-long-name.pdf" {
+		t.Errorf("document name = %q, want full source text for renderer truncation", first.Text)
+	}
+	if got, want := firstBackground.FillColor, theme.Color(theme.ColorNameInputBackground); got != want {
+		t.Errorf("first row background = %v, want alternate background %v", got, want)
+	}
+
+	secondBackground, _ := newCell(2)
+	if got, want := secondBackground.FillColor, theme.Color(theme.ColorNameBackground); got != want {
+		t.Errorf("second row background = %v, want default background %v", got, want)
+	}
+}
 
 func TestEnsureTranslationHistoryFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "haitranslator", "history.json")
