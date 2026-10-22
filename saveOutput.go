@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 )
 
-func showSavedTranslation(win fyne.Window, req translationRequest, translatedText string) {
+func ShowSavedTranslation(win fyne.Window, req translationRequest, translatedText string) {
 	directories, err := defaultApplicationDirectories()
 	if err != nil {
 		dialog.ShowError(err, win)

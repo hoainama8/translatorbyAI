@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func row2_2(inputDirectory string, outDirectory string, historyPath string, myApp fyne.App, myWindow fyne.Window) *fyne.Container {
+func row2_2(inputDirectory string, outDirectory string, historyPath string, myApp fyne.App, myWindow fyne.Window, req *translationRequest, outputText *string) *fyne.Container {
 	var popUp *widget.PopUp
 	content := container.NewStack()
 	popUp = widget.NewModalPopUp(content, myWindow.Canvas())
@@ -84,13 +85,38 @@ func row2_2(inputDirectory string, outDirectory string, historyPath string, myAp
 		content.Refresh()
 		popUp.Show()
 	})
+	pdfBtn := widget.NewButtonWithIcon("xuat ra file PDF", theme.FileTextIcon(), func() {
+		if err := WritePdf(*outputText, *req, outDirectory, myWindow); err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		dialog.ShowInformation("Thành công", "Đã lưu tệp PDF vào thư mục tài liệu dịch.", myWindow)
+	})
+	wordBtn := widget.NewButtonWithIcon("Xuất ra file Word", theme.DocumentIcon(), func() {
+		if *outputText == "" || outputText == nil {
+			dialog.ShowError(errors.New("không có nội dung để lưu "), myWindow)
+			return
+		}
+		path, err := saveTranslationFile(outDirectory, req.FileName, req.TargetLang, *outputText, ".docx")
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		dialog.ShowInformation("Thành công", "Đã lưu tệp Word: "+path, myWindow)
+	})
+
 	res := container.NewVBox(container.NewCenter(
-		container.NewHBox(
-			widget.NewButtonWithIcon("Mở thư mục tài liệu gốc", theme.FolderOpenIcon(), OpenDir(inputDirectory, myApp, myWindow)),
-			widget.NewButtonWithIcon("Mở thư mục tài liệu dịch", theme.FolderOpenIcon(), OpenDir(outDirectory, myApp, myWindow)),
-			open,
-			costBtn,
-		)))
+		container.NewGridWithRows(2,
+			container.NewGridWithColumns(2,
+				widget.NewButtonWithIcon("Mở thư mục tài liệu gốc", theme.FolderOpenIcon(), OpenDir(inputDirectory, myApp, myWindow)),
+				widget.NewButtonWithIcon("Mở thư mục tài liệu dịch", theme.FolderOpenIcon(), OpenDir(outDirectory, myApp, myWindow)),
+			),
+			container.NewGridWithColumns(4,
+				open,
+				costBtn,
+				pdfBtn,
+				wordBtn,
+			))))
 	return res
 }
 

@@ -6,6 +6,7 @@ require (
 	fyne.io/fyne/v2 v2.8.1
 	github.com/ledongthuc/pdf v0.0.0-20260907135840-6c8c28e0e8a0
 	github.com/pemistahl/lingua-go v1.4.0
+	github.com/signintech/gopdf v0.38.2
 	golang.org/x/net v0.38.0
 	golang.org/x/sys v0.49.0
 	google.golang.org/genai v1.72.0
@@ -43,6 +44,8 @@ require (
 	github.com/mattn/go-runewidth v0.0.24 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
+	github.com/phpdave11/gofpdi v1.0.16 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rymdport/portal v0.4.2 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect

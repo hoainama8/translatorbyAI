@@ -92,6 +92,30 @@ func TestWritePDFCreatesPDFWhenLibreOfficeIsAvailable(t *testing.T) {
 	}
 }
 
+// func TestWritePdfSavesPDFUsingSystemFont(t *testing.T) {
+// 	if _, err := readSystemPDFFont(); err != nil {
+// 		t.Skipf("no supported system font is installed: %v", err)
+// 	}
+
+// 	outputDir := t.TempDir()
+// 	request := translationRequest{
+// 		FileName:   "source.docx",
+// 		TargetLang: "Tiếng Việt",
+// 	}
+// 	if err := WritePdf("Xin chào, thế giới", request, outputDir, myWindow); err != nil {
+// 		t.Fatalf("WritePdf returned an error: %v", err)
+// 	}
+
+// 	path := filepath.Join(outputDir, "source - Tiếng Việt.pdf")
+// 	content, err := os.ReadFile(path)
+// 	if err != nil {
+// 		t.Fatalf("reading generated PDF: %v", err)
+// 	}
+// 	if len(content) < 5 || string(content[:5]) != "%PDF-" {
+// 		t.Fatal("output does not have a PDF signature")
+// 	}
+// }
+
 func TestDOCXAndODTOpenInLibreOffice(t *testing.T) {
 	converter := libreOfficePath(t)
 	tempDir := t.TempDir()

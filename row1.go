@@ -8,10 +8,15 @@ import (
 )
 
 func row1(outputEditor *widget.Entry) fyne.CanvasObject {
-	outputEditor.SetPlaceHolder("Kết quả dịch từ AI sẽ xuất hiện ở đây...")
+	var row1 fyne.CanvasObject
+	if outputEditor == nil {
+		label := widget.NewRichTextFromMarkdown(readme)
+		row1 = container.NewScroll(label)
+	}
+	//outputEditor.SetPlaceHolder("Kết quả dịch từ AI sẽ xuất hiện ở đây...")
 	outputEditor.Wrapping = fyne.TextWrapWord
 	//rightPanelBg := canvas.NewRectangle(color.NRGBA{R: 255, G: 248, B: 235, A: 255})
-	row1 := container.NewClip(outputEditor)
+	row1 = container.NewClip(outputEditor)
 	return row1
 }
 

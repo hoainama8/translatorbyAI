@@ -40,6 +40,13 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		dialog.ShowError(trackerErr, myWindow)
 	}
 
+	sourceLangSelect := widget.NewSelect(sourceLang, func(string) {})
+	targetLangSelect := widget.NewSelect(Lang, func(string) {})
+	modelSelect := widget.NewSelect(models, func(string) {})
+	apiKeyEntry := widget.NewPasswordEntry()
+	progressBar := widget.NewProgressBarInfinite()
+	// extension := widget.NewSelect(supportedOutputExtensions, func(string) {})
+
 	attachmentSection := MakeFileAttachmentCard(myWindow, func(fileName string, content []byte) {
 		if len(content) == 0 {
 			sourceName = ""
@@ -59,13 +66,21 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 
 	// modelSelect := widget.NewSelect(models, func(s string) {})
 	modelSelect.PlaceHolder = models[0]
-	extension.PlaceHolder = "Chọn định dạng tài liệu dịch"
+	//extension.PlaceHolder = "Chọn định dạng tài liệu dịch"
 	progressBar.Hide()
-
+	request := translationRequest{
+		APIKey:     apiKeyEntry.Text,
+		SourceLang: sourceLangSelect.Selected,
+		TargetLang: targetLangSelect.Selected,
+		FileName:   sourceName,
+		//Extension:  extension.Selected,
+		Model: modelSelect.Selected,
+	}
+	outputText := ""
 	var translateBtn *widget.Button
 
 	translateBtn = widget.NewButtonWithIcon("DỊCH NGAY VIA AI", theme.NavigateNextIcon(), func() {
-		fmt.Println(extension.Selected)
+		// fmt.Println(extension.Selected)
 		if document == nil {
 			dialog.ShowInformation("Cảnh báo", "Vui lòng nhập văn bản hoặc đính kèm tệp trước!", myWindow)
 			return
@@ -75,10 +90,16 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 			return
 		}
 
-		if strings.TrimSpace(extension.Selected) == "" {
-			dialog.ShowInformation("Cảnh báo", "Vui lòng chọn định dạng file xuất ra", myWindow)
-			return
-		}
+		// if strings.TrimSpace(extension.Selected) == "" {
+		// 	dialog.ShowInformation("Cảnh báo", "Vui lòng chọn định dạng file xuất ra", myWindow)
+		// 	return
+		// }
+		request.APIKey = apiKeyEntry.Text
+		request.SourceLang = sourceLangSelect.Selected
+		request.TargetLang = targetLangSelect.Selected
+		request.FileName = sourceName
+		// request.Extension = extension.Selected
+		request.Model = modelSelect.Selected
 		detectedLanguage, matchesTarget, err := documentLanguageMatchesTarget(
 			document.data,
 			document.name,
@@ -121,14 +142,6 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 			return
 		}
 
-		request := translationRequest{
-			APIKey:     apiKeyEntry.Text,
-			SourceLang: sourceLangSelect.Selected,
-			TargetLang: targetLangSelect.Selected,
-			FileName:   sourceName,
-			Extension:  extension.Selected,
-			Model:      modelSelect.Selected,
-		}
 		if document != nil {
 			request.FileName = document.name
 			request.FileType = mimeTypeForFile(document.name)
@@ -137,30 +150,30 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 			// its format before forwarding anything to Gemini.
 
 		}
-		fmt.Println(request)
 		progressBar.Show()
 		translateBtn.Disable()
 		translationStatus.setInProgress(true)
 
+		translationRequestForCall := request
 		go func() {
-			response, err := TestTrans(request)
+			response, err := TestTrans(translationRequestForCall)
 			fyne.Do(func() {
 				defer translationStatus.setInProgress(false)
 				progressBar.Hide()
 				translateBtn.Enable()
-				outputText := (*string)(nil)
+				modelOutputText := (*string)(nil)
 				if response != nil {
-					outputText = response.GetOutputText()
+					modelOutputText = response.GetOutputText()
 				}
 				result := "thành công"
-				if err != nil || outputText == nil {
+				if err != nil || modelOutputText == nil {
 					result = "thất bại"
 				}
 				if historyErr := appendTranslationHistory(historyPath, translationHistoryEntry{
 					Date:             time.Now().UTC(),
-					DocumentName:     request.FileName,
+					DocumentName:     translationRequestForCall.FileName,
 					DocumentLanguage: detectedLanguage,
-					TargetLanguage:   request.TargetLang,
+					TargetLanguage:   translationRequestForCall.TargetLang,
 					Result:           result,
 				}); historyErr != nil {
 					dialog.ShowError(historyErr, myWindow)
@@ -170,7 +183,7 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 					dialog.ShowError(err, myWindow)
 					return
 				}
-				if outputText == nil {
+				if modelOutputText == nil {
 					dialog.ShowError(fmt.Errorf("bản dịch không có nội dung văn bản"), myWindow)
 					return
 				}
@@ -183,8 +196,8 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 						refreshInputColumn()
 					}
 				}
-				outputEditor.SetText(*outputText)
-				showSavedTranslation(myWindow, request, *outputText)
+				outputText = *modelOutputText
+				outputEditor.SetText(outputText)
 			})
 		}()
 	})
@@ -194,18 +207,18 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		widget.NewFormItem("API key:", apiKeyEntry),
 		widget.NewFormItem("Ngôn ngữ nguồn:", sourceLangSelect),
 		widget.NewFormItem("Ngôn ngữ đích:", targetLangSelect),
-		widget.NewFormItem("Chọn định dạng file dịch", extension),
+		//widget.NewFormItem("Chọn định dạng file dịch", extension),
 		widget.NewFormItem("Mô hình AI:", modelSelect),
 		//widget.NewFormItem("Lựa chọn:", radio),
 		//widget.NewFormItem("Chọn:", combo),
 	)
-
+	fmt.Println(outputText)
 	center1 := container.NewVBox(
 		container.NewCenter(attachmentSection),
 		optionsForm,
 		container.NewCenter(translateBtn),
 		progressBar,
-		row2_2(inputDirectory, outDirectory, historyPath, myApp, myWindow),
+		row2_2(inputDirectory, outDirectory, historyPath, myApp, myWindow, &request, &outputText),
 	)
 
 	//center_green := container.NewStack(canvas.NewHorizontalGradient(color.NRGBA{R: 92, G: 51, B: 23, A: 255} , color.White), centerColumn)

@@ -1,45 +1,16 @@
-# Hướng dẫn sử dụng HaiTranslator
+[Title] Hướng dẫn sử dụng phần mềm dịch bằng AI
+# Giới thiệu
+- Đây là ứng dụng tân dụng sức mạnh của AI để dịch tài liệu, sách giữa các ngôn ngữ khác nhau như Anh <=> Việt, Việt <=> Đức, Việt <=> Trung,...
+- Ngôn ngữ hỗ trợ bao gồm 192 ngôn ngữ (hiện tại chỉ bao gồm các ngôn ngữ phổ biến)
+- Ai được sử dụng: các mô hình phổ biến, hiện tại chỉ hỗ trợ Gemini và Gemma4 - một biến thể của Gemini nhưng có giá thấp hơn.
 
-HaiTranslator là ứng dụng dịch tài liệu bằng Gemini. Trước khi dịch, ứng dụng
-kiểm tra ngôn ngữ nội dung tệp ngay trên máy; nếu nội dung đã cùng ngôn ngữ đích,
-ứng dụng sẽ cảnh báo và dừng. Nếu tiếp tục dịch, nội dung tệp được gửi đến Gemini,
-hiển thị bản dịch và lưu bản dịch thành tệp mới.
-Mỗi lượt dịch được ghi vào `~/haitranslator/history.json` với ngày, tên tài liệu,
-ngôn ngữ tài liệu, ngôn ngữ đích và kết quả thành công/thất bại.
-
+## Hướng dẫn sử dụng
+- Kết quả dịch sẽ xuất hiện ở phần này.
+Phía bên dưới:
+- Bên trái là bảng điều khiển, người dùng cần nhập apikey, chọn ngôn ngữ của tài liệu (có thể để "tự động phát hiện"), cọn ngôn ngữ cần dịch, sau đó chọn định dạng file xuất ra và cuối cùng là chọn phiên bản của mô hình AI.
+- Sát bên dưới là các nút như mở thư mục input - đây là thư mục lưu các file do người dùng tải lên; mở thư mục output - đây là thư mục lưu các file đã được dịch; kế đến là nút "Lịch sử dịch" để người dùng xem lại kết quả dịch tài liệu; và cuối cùng là nút chi phí để xem số token đã sử dụng và chi phí phải trả cho mỗi lần dịch.
+- Bên phải là đơn giá của từng mô hình, thường thì các mô hình AI mới hơn và thông minh hơn sẽ có giá cao hơn, đồng thời nó cũng cho kết quả nhanh hơn và chính sách hơn các mô hình có mức giá rẻ hơn. Lưu ý mức giá này cho 1 triệu tokens, để người dùng dễ hình dung thì khái quát như sau: với 1 triệu token thì có thể dịch được 1 cuốn sách tầm 300 trang, và người dùng phải trả mức cao nhất cỡ $4 (gemini-3.8-flash)
 ![Ảnh chụp màn hình ứng dụng HaiTranslator](screenshot-2026-10-19_17-39-48.png)
-## Các phần trên giao diện
-1. Vị trí số 1: Đây là nơi xuất hiện nội dung bản dịch
-2. Vị trí số 2: Đây là nơi chọn các thông số đầu vào
-**API KEY** : là đoạn mã dùng để xác thực khi gửi tin nhắn đến gemini.
-**Ngôn ngữ nguồn**: chọn ngôn ngữ của tài liệu hoặc chọn **Tự động phát hiện**.
-**Ngôn ngữ đích**: chọn ngôn ngữ cần dịch sang.
- **Chọn định dạng file dịch**: chọn định dạng tệp đầu ra: `.txt`, `.docx`, `.pdf`, `.md`, `.tex` hoặc `.odt`.
-**Mô hình AI**: chọn mô hình Gemini dùng để dịch.
-**Nút DỊCH NGAY VIA AI**: gửi tài liệu cùng các lựa chọn lên Gemini. Trong khi chờ hản hồi, thanh tiến trình uất hiện và nút dịch tạm thời bị khóa. Khi xong,bản dịch hiện ở khung phía trên và ứng dụng thông báo nơi lưu tệp.
-**Mở thư mục input**: mở thư mục chứa các tệp đầu vào đã chọn.
-**Mở thư mục output**: mở thư mục lưu bản dịch. 
-3. Vị trí sô 3Đây là bảng thống kê số token đã sử dụng, và chi phí phải trả cho mỗi phiên dịch.
-### Windows
-Để cho đơn giản, tôi đã biên dịch thành file .exe, người dùng chỉ click đúp chuột vào là ứng dụng chạy.
-Ứng dụng được biên dịch theo phương pháp plug and play nên không cài đặt vào hệ thống nên không chiếm dung lượng của ổ cứng.
-
-## Linux 
-Người dùng linux giải nén tập tin
-Làm theo hướng dẫn ghi trong file Makefile
-
-## Macos
-Người dùng macOS chỉ cần kéo file cài đặt vào thư mục ứng dụng là xong.
-
-## Tạo Gemini API key
-
-Quy trình tạo key trên trang Google AI Studio giống nhau trên Windows, macOS
-và Linux. Truy cập [Google AI Studio - API keys](https://aistudio.google.com/app/apikey)
-bằng tài khoản Google, tạo hoặc chọn một Google Cloud project rồi chọn **Create
-API key**. Lưu key an toàn; không đăng key lên mã nguồn, ảnh chụp màn hình hoặc
-kho lưu trữ công khai. Ứng dụng hiện cần cùng một key ở biến môi trường
-`GEMINI_API_KEY` và ô **API key** trên giao diện.
-
 ### API key với quota miễn phí
 
 1. Mở trang API keys trong Google AI Studio và đăng nhập.

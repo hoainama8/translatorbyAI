@@ -1,7 +1,5 @@
 package main
 
-import "fyne.io/fyne/v2/widget"
-
 // Contasnt
 const applicationID = "vn.hoainam.fynetranslator"
 
@@ -23,26 +21,7 @@ const (
 var Lang = []string{"Tiếng Việt", "Tiếng Anh", "Tiếng Nhật", "Tiếng Trung", "Tiếng Pháp", "Tiếng Hàn", "Tiếng Đức", "Tiếng Latin", "Tiếng Nga"}
 var models = []string{"gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it", "gemma-4-26b-a4b-it"}
 var sourceLang = append([]string{"Tự động phát hiện"}, Lang...)
-var sourceLangSelect = widget.NewSelect(sourceLang, func(s string) {})
-
-//sourceLangSelect.SetSelected("Tự động phát hiện")
-
-var targetLangSelect = widget.NewSelect(Lang, func(s string) {})
-
-//targetLangSelect.SetSelected("Tiếng Việt")
-
-var modelSelect = widget.NewSelect(models, func(s string) {})
-
-//modelSelect.PlaceHolder = "Chọn mô hình AI"
-
-var apiKeyEntry = widget.NewPasswordEntry()
-
-// apiKeyEntry.SetPlaceHolder("Nhập API key")
-var progressBar = widget.NewProgressBarInfinite()
-
-// progressBar.Hide()
 var supportedOutputExtensions = []string{".txt", ".docx", ".pdf", ".md", ".tex", ".odt"}
-var extension = widget.NewSelect(supportedOutputExtensions, func(s string) {})
 
 type Price struct {
 	Input  float64
