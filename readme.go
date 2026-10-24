@@ -8,8 +8,9 @@ var readme string = `[Title] Hướng dẫn sử dụng phần mềm dịch bằ
 
 2. Hướng dẫn sử dụng
 2.1. Kết quả dịch sẽ xuất hiện ở đây.
+2.2. Tab YouTube cho phép dán đường dẫn YouTube và mở video bằng trình duyệt mặc định.
 Phía bên dưới:
-2.2. Bên trái là bảng điều khiển, người dùng cần nhập các thông tin sau:
+2.3. Bên trái là bảng điều khiển, người dùng cần nhập các thông tin sau:
  	- Api key: đây là mã bí mật dùng để giao tiếp với mô hình AI, 
 	- Ngôn ngữ nguồn: là ngôn ngữ của tài liệu, chế độ mặc định là "tự động phát hiện"
 	- Ngôn ngữ dịch: là ngôn ngữ mà bạn muốn tài liệu được dịch sang. Lưu ý ngôn ngữ nguồn phải khác ngôn ngữ đích, nếu không phần mềm sẽ báo lỗi.

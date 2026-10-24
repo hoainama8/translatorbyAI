@@ -22,7 +22,7 @@ type attachedDocument struct {
 var document *attachedDocument
 var sourceName string
 
-func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity, historyPath string) fyne.CanvasObject {
+func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity, historyPath string) fyne.CanvasObject {
 	tokenUsagePath, pathErr := defaultTokenUsagePath()
 	if pathErr != nil {
 		tokenUsagePath = "token_usage.json"
@@ -76,7 +76,7 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		//Extension:  extension.Selected,
 		Model: modelSelect.Selected,
 	}
-	outputText := ""
+
 	var translateBtn *widget.Button
 
 	translateBtn = widget.NewButtonWithIcon("DỊCH NGAY VIA AI", theme.NavigateNextIcon(), func() {
@@ -161,12 +161,12 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 				defer translationStatus.setInProgress(false)
 				progressBar.Hide()
 				translateBtn.Enable()
-				modelOutputText := (*string)(nil)
-				if response != nil {
-					modelOutputText = response.GetOutputText()
-				}
+				//modelOutputText := (*string)(nil)
+				// if response != nil {
+				// 	modelOutputText = response.GetOutputText()
+				// }
 				result := "thành công"
-				if err != nil || modelOutputText == nil {
+				if err != nil || response.GetOutputText() == nil {
 					result = "thất bại"
 				}
 				if historyErr := appendTranslationHistory(historyPath, translationHistoryEntry{
@@ -183,7 +183,7 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 					dialog.ShowError(err, myWindow)
 					return
 				}
-				if modelOutputText == nil {
+				if response.GetOutputText() == nil {
 					dialog.ShowError(fmt.Errorf("bản dịch không có nội dung văn bản"), myWindow)
 					return
 				}
@@ -196,8 +196,8 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 						refreshInputColumn()
 					}
 				}
-				outputText = *modelOutputText
-				outputEditor.SetText(outputText)
+				outputText = *response.GetOutputText()
+				//outputEditor.SetText(*response.GetOutputText())
 			})
 		}()
 	})
@@ -212,7 +212,7 @@ func Control(outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, L
 		//widget.NewFormItem("Lựa chọn:", radio),
 		//widget.NewFormItem("Chọn:", combo),
 	)
-	fmt.Println(outputText)
+	//fmt.Println(outputText)
 	center1 := container.NewVBox(
 		container.NewCenter(attachmentSection),
 		optionsForm,

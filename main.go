@@ -14,7 +14,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 )
 
 type translationRequest struct {
@@ -82,16 +81,17 @@ func main() {
 	//, refreshInputColumn := createInputColumn(models)
 
 	// CỘT 3: OUTPUT
-	outputEditor := widget.NewMultiLineEntry()
+	var outputText = ""
 
-	outputEditor.SetText(readme)
-	row22, refeshInputColumn := createInputColumn(models)
-	row21 := Control(outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
+	// outputEditor.SetText(readme)
+	row22, refeshInputColumn := createInputColumn()
+	row21 := Control(outputText, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
 	row2 := container.NewGridWithColumns(2, row21, row22)
-	row1 := container.NewThemeOverride(
-		row1(outputEditor),
-		outputEditorTheme{Theme: theme.DefaultTheme()},
-	)
+	// row1 := container.NewThemeOverride(
+	// 	row1(outputEditor),
+	// 	outputEditorTheme{Theme: theme.DefaultTheme()},
+	// )
+	row1 := row1(outputText, directories.history, myWindow)
 	// CỘT 2: GIỮA
 	mainContent := container.NewGridWithRows(2,
 		row1,

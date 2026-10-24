@@ -23,6 +23,8 @@ var models = []string{"gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-
 var sourceLang = append([]string{"Tự động phát hiện"}, Lang...)
 var supportedOutputExtensions = []string{".txt", ".docx", ".pdf", ".md", ".tex", ".odt"}
 
+// var outputText string
+
 type Price struct {
 	Input  float64
 	Output float64

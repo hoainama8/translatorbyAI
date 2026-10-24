@@ -54,6 +54,20 @@ func TestTranslationHistoryTableClipsTextAndAlternatesRows(t *testing.T) {
 	}
 }
 
+func TestTranslationHistoryTableViewFillsContainer(t *testing.T) {
+	app := test.NewApp()
+	t.Cleanup(app.Quit)
+
+	table := translationHistoryTable(nil)
+	view := translationHistoryTableView(table)
+	size := fyne.NewSize(1500, 700)
+	view.Resize(size)
+
+	if got := table.Size(); got != size {
+		t.Errorf("table size = %v, want container size %v", got, size)
+	}
+}
+
 func TestEnsureTranslationHistoryFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "haitranslator", "history.json")
 	if err := ensureTranslationHistoryFile(path); err != nil {

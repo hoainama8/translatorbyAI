@@ -7,9 +7,18 @@ import (
 	"testing"
 	"time"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/test"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
+
+func costTableCell(table *widget.Table, row, col int) (*canvas.Rectangle, *widget.Label) {
+	cell := table.CreateCell().(*fyne.Container)
+	table.UpdateCell(widget.TableCellID{Row: row, Col: col}, cell)
+	return cell.Objects[0].(*canvas.Rectangle), cell.Objects[1].(*widget.Label)
+}
 
 func TestCostTableShowsModelUsageAndCost(t *testing.T) {
 	app := test.NewApp()
@@ -30,15 +39,24 @@ func TestCostTableShowsModelUsageAndCost(t *testing.T) {
 
 	want := []string{"2026-10-21", "03:30:00", "1000", "150", "200", "$0.001178"}
 	for col, expected := range want {
-		cell := table.CreateCell()
-		table.UpdateCell(widget.TableCellID{Row: 1, Col: col}, cell)
-		if got := cell.(*widget.Label).Text; got != expected {
+		_, label := costTableCell(table, 1, col)
+		if got := label.Text; got != expected {
 			t.Errorf("cell (1,%d) = %q, want %q", col, got, expected)
 		}
 	}
-	totalCell := table.CreateCell()
-	table.UpdateCell(widget.TableCellID{Row: 2, Col: 5}, totalCell)
-	if got := totalCell.(*widget.Label).Text; got != "$0.001178" {
+	headerBackground, _ := costTableCell(table, 0, 0)
+	if got, want := headerBackground.FillColor, theme.Color(theme.ColorNameBackground); got != want {
+		t.Errorf("header background = %v, want default background %v", got, want)
+	}
+	firstRowBackground, _ := costTableCell(table, 1, 0)
+	if got, want := firstRowBackground.FillColor, theme.Color(theme.ColorNameInputBackground); got != want {
+		t.Errorf("first row background = %v, want alternate background %v", got, want)
+	}
+	totalBackground, totalLabel := costTableCell(table, 2, 5)
+	if got, want := totalBackground.FillColor, theme.Color(theme.ColorNameBackground); got != want {
+		t.Errorf("total row background = %v, want default background %v", got, want)
+	}
+	if got := totalLabel.Text; got != "$0.001178" {
 		t.Errorf("total cost = %q, want %q", got, "$0.001178")
 	}
 }
@@ -50,14 +68,12 @@ func TestCostTableShowsEmptyStateForModel(t *testing.T) {
 	if rows, columns := table.Length(); rows != 3 || columns != 6 {
 		t.Fatalf("table dimensions = %dx%d, want 3x6", rows, columns)
 	}
-	cell := table.CreateCell()
-	table.UpdateCell(widget.TableCellID{Row: 1, Col: 0}, cell)
-	if got := cell.(*widget.Label).Text; got != "Chưa có dữ liệu" {
+	_, label := costTableCell(table, 1, 0)
+	if got := label.Text; got != "Chưa có dữ liệu" {
 		t.Errorf("empty-state text = %q, want %q", got, "Chưa có dữ liệu")
 	}
-	totalCell := table.CreateCell()
-	table.UpdateCell(widget.TableCellID{Row: 2, Col: 5}, totalCell)
-	if got := totalCell.(*widget.Label).Text; got != "$0.000000" {
+	_, totalLabel := costTableCell(table, 2, 5)
+	if got := totalLabel.Text; got != "$0.000000" {
 		t.Errorf("empty total cost = %q, want %q", got, "$0.000000")
 	}
 }
