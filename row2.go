@@ -79,7 +79,7 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 
 	var translateBtn *widget.Button
 
-	translateBtn = widget.NewButtonWithIcon("DỊCH NGAY VIA AI", theme.NavigateNextIcon(), func() {
+	translateBtn = widget.NewButtonWithIcon("DỊCH == AI", theme.NavigateNextIcon(), func() {
 		// fmt.Println(extension.Selected)
 		if document == nil {
 			dialog.ShowInformation("Cảnh báo", "Vui lòng nhập văn bản hoặc đính kèm tệp trước!", myWindow)

@@ -10,7 +10,8 @@ func row1(outputText string, historyPath string, myWindow fyne.Window) fyne.Canv
 	tabs := container.NewAppTabs()
 
 	Tabmain("Nội dung dịch", outputText, tabs)
-	Tabmain("Hướng dẫn sử dụng", readme, tabs)
+	TabGuide(tabs)
+	TabCopyright(tabs)
 	TabHistory(historyPath, myWindow, tabs)
 	TabCost(myWindow, tabs)
 	TabPrice(models, tabs)

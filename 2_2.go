@@ -7,7 +7,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -28,34 +27,34 @@ func (t blueButtonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVaria
 }
 
 func row2_2(inputDirectory string, outDirectory string, historyPath string, myApp fyne.App, myWindow fyne.Window, req *translationRequest, outputText *string) *fyne.Container {
-	var popUp *widget.PopUp
-	content := container.NewStack()
-	popUp = widget.NewModalPopUp(container.NewThemeOverride(content, blueButtonTheme{Theme: theme.DefaultTheme()}), myWindow.Canvas())
-	popUp.Resize(fyne.NewSize(1500, 700))
+	// var popUp *widget.PopUp
+	// content := container.NewStack()
+	// popUp = widget.NewModalPopUp(container.NewThemeOverride(content, blueButtonTheme{Theme: theme.DefaultTheme()}), myWindow.Canvas())
+	// popUp.Resize(fyne.NewSize(1500, 700))
 
-	historyBtn := widget.NewButton("Lịch sử dịch", func() {
-		entries, err := readTranslationHistory(historyPath)
-		if err != nil {
-			dialog.ShowError(err, myWindow)
-			return
-		}
-		closeButton := widget.NewButton("Đóng", func() {
-			popUp.Hide()
-		})
-		closeButton.Importance = widget.HighImportance
-		content.Objects = []fyne.CanvasObject{container.NewBorder(
-			widget.NewLabelWithStyle("Thống kê lịch sử dịch tài liệu", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-			container.NewHBox(layout.NewSpacer(), closeButton),
-			nil,
-			nil,
-			container.NewThemeOverride(
-				translationHistoryTableView(translationHistoryTable(entries)),
-				outputEditorTheme{Theme: theme.DefaultTheme()},
-			),
-		)}
-		content.Refresh()
-		popUp.Show()
-	})
+	// historyBtn := widget.NewButton("Lịch sử dịch", func() {
+	// 	entries, err := readTranslationHistory(historyPath)
+	// 	if err != nil {
+	// 		dialog.ShowError(err, myWindow)
+	// 		return
+	// 	}
+	// 	closeButton := widget.NewButton("Đóng", func() {
+	// 		popUp.Hide()
+	// 	})
+	// 	closeButton.Importance = widget.HighImportance
+	// 	content.Objects = []fyne.CanvasObject{container.NewBorder(
+	// 		widget.NewLabelWithStyle("Thống kê lịch sử dịch tài liệu", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+	// 		container.NewHBox(layout.NewSpacer(), closeButton),
+	// 		nil,
+	// 		nil,
+	// 		container.NewThemeOverride(
+	// 			translationHistoryTableView(translationHistoryTable(entries)),
+	// 			outputEditorTheme{Theme: theme.DefaultTheme()},
+	// 		),
+	// 	)}
+	// 	content.Refresh()
+	// 	popUp.Show()
+	// })
 
 	//Xem lịch sử sử dụng token
 
@@ -70,7 +69,7 @@ func row2_2(inputDirectory string, outDirectory string, historyPath string, myAp
 		}
 		dialog.ShowInformation("Thành công", "Đã lưu tệp PDF vào thư mục tài liệu dịch.", myWindow)
 	})
-	historyBtn.Importance = widget.HighImportance
+	//historyBtn.Importance = widget.HighImportance
 	//costBtn.Importance = widget.HighImportance
 	pdfBtn.Importance = widget.HighImportance
 	exportButton := func(label, extension string) *widget.Button {
@@ -94,8 +93,8 @@ func row2_2(inputDirectory string, outDirectory string, historyPath string, myAp
 	txtBtn.Importance = widget.HighImportance
 	odtBtn.Importance = widget.HighImportance
 
-	res := container.NewVBox(container.NewThemeOverride(container.NewCenter(
-		container.NewGridWithRows(3,
+	res := container.NewVBox(container.NewThemeOverride(
+		container.NewCenter(container.NewGridWithRows(2,
 			container.NewGridWithColumns(2,
 				blueButton("Mở thư mục tài liệu gốc", theme.FolderOpenIcon(), OpenDir(inputDirectory, myApp, myWindow)),
 				blueButton("Mở thư mục tài liệu dịch", theme.FolderOpenIcon(), OpenDir(outDirectory, myApp, myWindow)),
@@ -106,10 +105,9 @@ func row2_2(inputDirectory string, outDirectory string, historyPath string, myAp
 				txtBtn,
 				odtBtn,
 			),
-			container.NewGridWithColumns(2,
-				//costBtn,
-				historyBtn))),
-		blueButtonTheme{Theme: theme.DefaultTheme()}))
+		)),
+		blueButtonTheme{Theme: theme.DefaultTheme()},
+	))
 	return res
 }
 

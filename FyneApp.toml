@@ -1,8 +1,8 @@
 Website = "https://VND.com"
 
 [Details]
-Icon = "myapp.png"
+Icon = "icon.png"
 Name = "HaiTranslator"
 ID = "xxx.YYY.app"
-Version = "1.0.1"
-Build = 15
+Version = "1.1.1"
+Build = 19

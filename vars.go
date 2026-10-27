@@ -41,3 +41,13 @@ var modelPrices = map[string]Price{
 	"gemma-4-31b-it": {Input: 0.15 / limitToken, Output: 0.4 / limitToken, Cached: 0.06 / limitToken},
 	//"gemma-4-26b-a4b-it": {Input: 0.09 / limitToken, Output: 0.3 / limitToken, Cached: 0.05 / limitToken},
 }
+
+// Struct
+type Donate struct {
+	Name    string
+	Address string
+	Phone   string
+	Website string
+	Logo    string
+	Image   []byte
+}

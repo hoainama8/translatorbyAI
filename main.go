@@ -84,7 +84,16 @@ func main() {
 	var outputText = ""
 
 	// outputEditor.SetText(readme)
-	row22, refeshInputColumn := createInputColumn()
+	donations := []Donate{
+		{
+			Name:    "ten nha tai tro A",
+			Address: "112334",
+		}, {
+			Name:    "ten nha tai tro B",
+			Address: "12235",
+		},
+	}
+	row22, refeshInputColumn := createInputColumn(donations)
 	row21 := Control(outputText, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
 	row2 := container.NewGridWithColumns(2, row21, row22)
 	// row1 := container.NewThemeOverride(
