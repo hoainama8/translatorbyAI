@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
@@ -25,50 +26,29 @@ func TestTrans(req translationRequest) (*InteractionsJSON, error) {
 	if err != nil {
 		return nil, fmt.Errorf("không thể khởi tạo Gemini client: %w", err)
 	}
-	fileover50mb := validateDocumentSize(req.Document, maxGeminiBatchSize)
+	document, err := base64.StdEncoding.Strict().DecodeString(req.Document)
+	if err != nil {
+		return nil, fmt.Errorf("dữ liệu tài liệu không phải Base64 hợp lệ: %w", err)
+	}
+	if len(document) == 0 {
+		return nil, errors.New("tài liệu cần dịch không được để trống")
+	}
 
 	if strings.TrimSpace(req.SourceLang) == "" {
 		req.SourceLang = "tự động phát hiện"
 	}
 	prompt := BuildTextPrompt(req)
-	var input interactions.InteractionsInput
-	if fileover50mb {
-		// res, err := TranbyDoc(ctx, client, req, prompt)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		readerDocument := bytes.NewReader([]byte(req.Document))
-		docFile, err := client.Files.Upload(ctx, readerDocument, &genai.UploadFileConfig{
-			MIMEType: req.FileType,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		input = interactions.NewInteractionsInput([]interactions.Content{
-			interactions.NewContent(interactions.DocumentContent{
-				URI:      genai.Ptr(docFile.URI),
-				MimeType: interactions.DocumentContentMimeType(docFile.MIMEType).ToPointer(),
-			})})
-	} else {
-		// res, err := TransbyFile(ctx, client, req, prompt)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		readerDocument := bytes.NewReader([]byte(req.Document))
-		docFile, err := client.Files.Upload(ctx, readerDocument, &genai.UploadFileConfig{
-			MIMEType: req.FileType,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		input = interactions.NewInteractionsInput([]interactions.Content{
-			interactions.NewContent(interactions.DocumentContent{
-				URI:      genai.Ptr(docFile.URI),
-				MimeType: interactions.DocumentContentMimeType(docFile.MIMEType).ToPointer(),
-			})})
+	docFile, err := client.Files.Upload(ctx, bytes.NewReader(document), &genai.UploadFileConfig{
+		MIMEType: req.FileType,
+	})
+	if err != nil {
+		return nil, err
 	}
+	input := interactions.NewInteractionsInput([]interactions.Content{
+		interactions.NewContent(interactions.DocumentContent{
+			URI:      genai.Ptr(docFile.URI),
+			MimeType: interactions.DocumentContentMimeType(docFile.MIMEType).ToPointer(),
+		})})
 	res, err := client.Interactions.Create(ctx, operations.CreateInteractionRequest{
 		Body: operations.NewCreateInteractionRequestBody(interactions.CreateModelInteraction{
 			Model:             interactions.Model(req.Model),

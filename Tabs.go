@@ -4,18 +4,26 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
-func row1(outputText string, historyPath string, myWindow fyne.Window) fyne.CanvasObject {
+func row1(outputText string, historyPath string, myWindow fyne.Window) (*container.AppTabs, *widget.Entry, func()) {
 	tabs := container.NewAppTabs()
 
-	Tabmain("Nội dung dịch", outputText, tabs)
+	outputEditor := Tabmain("Nội dung dịch", outputText, tabs)
 	TabGuide(tabs)
 	TabCopyright(tabs)
-	TabHistory(historyPath, myWindow, tabs)
-	TabCost(myWindow, tabs)
+	refreshHistory := TabHistory(historyPath, myWindow, tabs)
+	refreshCost := TabCost(myWindow, tabs)
 	TabPrice(models, tabs)
-	return tabs
+	return tabs, outputEditor, func() {
+		if refreshHistory != nil {
+			refreshHistory()
+		}
+		if refreshCost != nil {
+			refreshCost()
+		}
+	}
 }
 
 type outputEditorTheme struct {

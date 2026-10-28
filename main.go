@@ -24,7 +24,8 @@ type translationRequest struct {
 	FileType   string
 	Model      string
 	Document   string // Dữ liệu file đính kèm đã mã hóa Base64
-	Extension  string // Định dạng file xuất ra
+	Account    bool   // true nếu sử dụng tài khoản miễn phí
+	Extension  string
 }
 
 func mimeTypeForFile(fileName string) string {
@@ -83,6 +84,8 @@ func main() {
 	// CỘT 3: OUTPUT
 	var outputText = ""
 
+	row1, outputEditor, refreshSummaryTabs := row1(outputText, directories.history, myWindow)
+
 	// outputEditor.SetText(readme)
 	donations := []Donate{
 		{
@@ -94,13 +97,12 @@ func main() {
 		},
 	}
 	row22, refeshInputColumn := createInputColumn(donations)
-	row21 := Control(outputText, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history)
+	row21 := Control(&outputText, outputEditor, myApp, myWindow, Lang, models, refeshInputColumn, directories.input, directories.output, translationStatus, directories.history, refreshSummaryTabs)
 	row2 := container.NewGridWithColumns(2, row21, row22)
 	// row1 := container.NewThemeOverride(
 	// 	row1(outputEditor),
 	// 	outputEditorTheme{Theme: theme.DefaultTheme()},
 	// )
-	row1 := row1(outputText, directories.history, myWindow)
 	// CỘT 2: GIỮA
 	mainContent := container.NewGridWithRows(2,
 		row1,

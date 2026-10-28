@@ -12,43 +12,55 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func TabCost(myWindow fyne.Window, tabs *container.AppTabs) {
+func TabCost(myWindow fyne.Window, tabs *container.AppTabs) func() {
 
 	tokenUsagePath, err := defaultTokenUsagePath()
 	if err != nil {
 		dialog.ShowError(err, myWindow)
-		return
+		return nil
 	}
 	tokenFile, err := os.ReadFile(tokenUsagePath)
 	if err != nil {
 		dialog.ShowError(err, myWindow)
-		return
+		return nil
 	}
 	tokenData, err := decodeTokenUsageData(tokenFile)
 	if err != nil {
 		dialog.ShowError(err, myWindow)
-		return
+		return nil
 	}
 
+	tab := container.NewTabItem("Thống kê chi phí", costContent(tokenData))
+	tabs.Append(tab)
+	tabs.Refresh()
+	return func() {
+		tokenFile, err := os.ReadFile(tokenUsagePath)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		tokenData, err := decodeTokenUsageData(tokenFile)
+		if err != nil {
+			dialog.ShowError(err, myWindow)
+			return
+		}
+		tab.Content = costContent(tokenData)
+		tabs.Refresh()
+	}
+}
+
+func costContent(tokenData tokenUsageData) fyne.CanvasObject {
 	tabsub := container.NewAppTabs()
 	for _, model := range models {
 		table := CostTable(tokenData, model)
-		// tabsub.Append(container.NewTabItemWithIcon(
-		// 	model,
-		// 	theme.DocumentIcon(),
-		// 	container.NewThemeOverride(table, outputEditorTheme{Theme: theme.DefaultTheme()}),
-		// ))
-
 		tabsub.Append(container.NewTabItem(model,
 			container.NewThemeOverride(
 				weightedTableView(table, []float32{120, 100, 110, 110, 110, 120}),
 				outputEditorTheme{Theme: theme.DefaultTheme()},
 			)))
 	}
-
 	tabsub.Refresh()
-	tabs.Append(container.NewTabItem("Thống kê chi phí",
-		container.NewScroll(tabsub)))
+	return container.NewScroll(tabsub)
 }
 
 func CostTable(entries tokenUsageData, model string) *widget.Table {

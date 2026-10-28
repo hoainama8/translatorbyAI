@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func Tabmain(nametab string, text string, tabs *container.AppTabs) {
+func Tabmain(nametab string, text string, tabs *container.AppTabs) *widget.Entry {
 	content := widget.NewMultiLineEntry()
 	if text == "" {
 		text = ("Noi dung dich sex xuat tai day")
@@ -23,6 +23,7 @@ func Tabmain(nametab string, text string, tabs *container.AppTabs) {
 		contentTabTheme{Theme: theme.DefaultTheme()},
 	)))
 	tabs.Refresh()
+	return content
 }
 
 type contentTabTheme struct {

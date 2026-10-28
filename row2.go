@@ -22,7 +22,7 @@ type attachedDocument struct {
 var document *attachedDocument
 var sourceName string
 
-func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity, historyPath string) fyne.CanvasObject {
+func Control(outputText *string, outputEditor *widget.Entry, myApp fyne.App, myWindow fyne.Window, Lang []string, models []string, refreshInputColumn func(), inputDirectory string, outDirectory string, translationStatus *translationActivity, historyPath string, refreshSummaryTabs func()) fyne.CanvasObject {
 	tokenUsagePath, pathErr := defaultTokenUsagePath()
 	if pathErr != nil {
 		tokenUsagePath = "token_usage.json"
@@ -43,9 +43,11 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 	sourceLangSelect := widget.NewSelect(sourceLang, func(string) {})
 	targetLangSelect := widget.NewSelect(Lang, func(string) {})
 	modelSelect := widget.NewSelect(models, func(string) {})
+	accountOptions := []string{"Miễn phí", "Trả phí"}
+	accountSelect := widget.NewSelect(accountOptions, func(string) {})
 	apiKeyEntry := widget.NewPasswordEntry()
 	progressBar := widget.NewProgressBarInfinite()
-	// extension := widget.NewSelect(supportedOutputExtensions, func(string) {})
+	extension := widget.NewSelect(supportedOutputExtensions, func(string) {})
 
 	attachmentSection := MakeFileAttachmentCard(myWindow, func(fileName string, content []byte) {
 		if len(content) == 0 {
@@ -63,18 +65,21 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 
 	sourceLangSelect.SetSelected("Tự động phát hiện")
 	targetLangSelect.SetSelected("Tiếng Việt")
+	accountSelect.SetSelected(accountOptions[0])
 
 	// modelSelect := widget.NewSelect(models, func(s string) {})
 	modelSelect.PlaceHolder = models[0]
-	//extension.PlaceHolder = "Chọn định dạng tài liệu dịch"
+	modelSelect.SetSelected(models[0])
+
 	progressBar.Hide()
 	request := translationRequest{
 		APIKey:     apiKeyEntry.Text,
 		SourceLang: sourceLangSelect.Selected,
 		TargetLang: targetLangSelect.Selected,
 		FileName:   sourceName,
-		//Extension:  extension.Selected,
-		Model: modelSelect.Selected,
+		Extension:  extension.Selected,
+		Model:      modelSelect.Selected,
+		Account:    accountSelect.Selected == accountOptions[0],
 	}
 
 	var translateBtn *widget.Button
@@ -100,6 +105,7 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 		request.FileName = sourceName
 		// request.Extension = extension.Selected
 		request.Model = modelSelect.Selected
+		request.Account = accountSelect.Selected == accountOptions[0]
 		detectedLanguage, matchesTarget, err := documentLanguageMatchesTarget(
 			document.data,
 			document.name,
@@ -156,7 +162,13 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 
 		translationRequestForCall := request
 		go func() {
-			response, err := TestTrans(translationRequestForCall)
+			var response *InteractionsJSON
+			var err error
+			if translationRequestForCall.Account {
+				response, err = TestTrans(translationRequestForCall)
+			} else {
+				response, err = BacthTrans(translationRequestForCall)
+			}
 			fyne.Do(func() {
 				defer translationStatus.setInProgress(false)
 				progressBar.Hide()
@@ -166,7 +178,7 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 				// 	modelOutputText = response.GetOutputText()
 				// }
 				result := "thành công"
-				if err != nil || response.GetOutputText() == nil {
+				if err != nil || response == nil || response.GetOutputText() == nil {
 					result = "thất bại"
 				}
 				if historyErr := appendTranslationHistory(historyPath, translationHistoryEntry{
@@ -178,12 +190,15 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 				}); historyErr != nil {
 					dialog.ShowError(historyErr, myWindow)
 				}
+				if refreshSummaryTabs != nil {
+					defer refreshSummaryTabs()
+				}
 				if err != nil {
 					fmt.Println(err)
 					dialog.ShowError(err, myWindow)
 					return
 				}
-				if response.GetOutputText() == nil {
+				if response == nil || response.GetOutputText() == nil {
 					dialog.ShowError(fmt.Errorf("bản dịch không có nội dung văn bản"), myWindow)
 					return
 				}
@@ -196,8 +211,8 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 						refreshInputColumn()
 					}
 				}
-				outputText = *response.GetOutputText()
-				//outputEditor.SetText(*response.GetOutputText())
+				*outputText = *response.GetOutputText()
+				outputEditor.SetText(*outputText)
 			})
 		}()
 	})
@@ -207,18 +222,18 @@ func Control(outputText string, myApp fyne.App, myWindow fyne.Window, Lang []str
 		widget.NewFormItem("API key:", apiKeyEntry),
 		widget.NewFormItem("Ngôn ngữ nguồn:", sourceLangSelect),
 		widget.NewFormItem("Ngôn ngữ đích:", targetLangSelect),
+		widget.NewFormItem("Tài khoản:", accountSelect),
 		//widget.NewFormItem("Chọn định dạng file dịch", extension),
 		widget.NewFormItem("Mô hình AI:", modelSelect),
 		//widget.NewFormItem("Lựa chọn:", radio),
 		//widget.NewFormItem("Chọn:", combo),
 	)
-	//fmt.Println(outputText)
 	center1 := container.NewVBox(
 		container.NewCenter(attachmentSection),
 		optionsForm,
 		container.NewCenter(translateBtn),
 		progressBar,
-		row2_2(inputDirectory, outDirectory, historyPath, myApp, myWindow, &request, &outputText),
+		row2_2(inputDirectory, outDirectory, historyPath, myApp, myWindow, &request, outputText),
 	)
 
 	//center_green := container.NewStack(canvas.NewHorizontalGradient(color.NRGBA{R: 92, G: 51, B: 23, A: 255} , color.White), centerColumn)

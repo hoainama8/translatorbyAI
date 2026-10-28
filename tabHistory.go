@@ -11,17 +11,30 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func TabHistory(historyPath string, mywindow fyne.Window, tabs *container.AppTabs) {
+func TabHistory(historyPath string, mywindow fyne.Window, tabs *container.AppTabs) func() {
 	entries, err := readTranslationHistory(historyPath)
 	if err != nil {
 		dialog.ShowError(err, mywindow)
 	}
-	tabs.Append(container.NewTabItem("Lich su dich tai lieu",
-		container.NewThemeOverride(
-			translationHistoryTableView(translationHistoryTable(entries)),
-			outputEditorTheme{Theme: theme.DefaultTheme()},
-		)))
+	tab := container.NewTabItem("Lich su dich tai lieu", translationHistoryContent(entries))
+	tabs.Append(tab)
 	tabs.Refresh()
+	return func() {
+		entries, err := readTranslationHistory(historyPath)
+		if err != nil {
+			dialog.ShowError(err, mywindow)
+			return
+		}
+		tab.Content = translationHistoryContent(entries)
+		tabs.Refresh()
+	}
+}
+
+func translationHistoryContent(entries []translationHistoryEntry) fyne.CanvasObject {
+	return container.NewThemeOverride(
+		translationHistoryTableView(translationHistoryTable(entries)),
+		outputEditorTheme{Theme: theme.DefaultTheme()},
+	)
 }
 
 var translationHistoryColumnWidths = [...]float32{190, 420, 220, 220, 180}

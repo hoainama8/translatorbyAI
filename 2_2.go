@@ -27,36 +27,6 @@ func (t blueButtonTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVaria
 }
 
 func row2_2(inputDirectory string, outDirectory string, historyPath string, myApp fyne.App, myWindow fyne.Window, req *translationRequest, outputText *string) *fyne.Container {
-	// var popUp *widget.PopUp
-	// content := container.NewStack()
-	// popUp = widget.NewModalPopUp(container.NewThemeOverride(content, blueButtonTheme{Theme: theme.DefaultTheme()}), myWindow.Canvas())
-	// popUp.Resize(fyne.NewSize(1500, 700))
-
-	// historyBtn := widget.NewButton("Lịch sử dịch", func() {
-	// 	entries, err := readTranslationHistory(historyPath)
-	// 	if err != nil {
-	// 		dialog.ShowError(err, myWindow)
-	// 		return
-	// 	}
-	// 	closeButton := widget.NewButton("Đóng", func() {
-	// 		popUp.Hide()
-	// 	})
-	// 	closeButton.Importance = widget.HighImportance
-	// 	content.Objects = []fyne.CanvasObject{container.NewBorder(
-	// 		widget.NewLabelWithStyle("Thống kê lịch sử dịch tài liệu", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
-	// 		container.NewHBox(layout.NewSpacer(), closeButton),
-	// 		nil,
-	// 		nil,
-	// 		container.NewThemeOverride(
-	// 			translationHistoryTableView(translationHistoryTable(entries)),
-	// 			outputEditorTheme{Theme: theme.DefaultTheme()},
-	// 		),
-	// 	)}
-	// 	content.Refresh()
-	// 	popUp.Show()
-	// })
-
-	//Xem lịch sử sử dụng token
 
 	pdfBtn := widget.NewButtonWithIcon("xuat ra file PDF", theme.FileTextIcon(), func() {
 		if outputText == nil || *outputText == "" {
